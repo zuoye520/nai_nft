@@ -56,7 +56,7 @@
         :alt="shortenAddress(store.address)"
         class="w-8 h-8 rounded-full"
       />
-      <span class="text-white">{{ shortenAddress(store.address) }}</span>
+      <span class="text-white">{{ shortenAddress(store.shortAddress) }}</span>
     </button>
   </div>
 </template>

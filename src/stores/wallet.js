@@ -1,227 +1,332 @@
-// NABOX Wallet Service for NULS Network
-import { sendRequest } from '../utils/httpUtils'
-import { CHAINS,CURRENT_NETWORK } from '../config'
-class WalletService {
-  constructor() {
-    this.NaboxWallet = window.NaboxWallet
-    this.nabox = window.nabox
-    this.session = null
-    this.chainId = CURRENT_NETWORK.chainId
-    this.chainName = 'NULS'
-  }
+import { defineStore } from 'pinia'
+import { ref, computed } from 'vue'
+import { walletService } from '../services/wallet'
+import * as api from '../services/api'
+import {fromAmount,formatUsd} from '../utils/format'
 
-  // 检查是否安装了 NABOX 钱包
-  isNaboxInstalled() {
-    return typeof window.nabox !== 'undefined' && !!window.nabox
-  }
+import { CHAINS ,NABOX_DOWNLOAD_URL} from '../config'
+export const useWalletStore = defineStore('wallet', () => {
+  const intervalId = ref(null)
+  const account = ref(null)
+  const accountPub = ref(null)
+  const chainInfo = ref(null)
+  const networkStatus = ref({ connected: false, chainId: null, error: null })
+  const isConnecting = ref(false)
+  const error = ref(null)
+  const nulsBalance = ref(0)
+  const nulsUsdPrice = ref(0)
+  // 域名列表数据
+  const domains = ref([])
+  const primaryDomain = ref('')
+  const userUri = ref('')
 
-  // 连接 NABOX 钱包
-  async connect() {
-    if (!this.isNaboxInstalled()) {
-      throw new Error('Please install NABOX wallet first')
-    }
+  // 奖励数据
+  const totalRewards = ref('0')
+  const totalRewardsUsd = ref('0')
+  const unclaimedRewards = ref('0')
+  const unclaimedRewardsUsd = ref('0')
 
-    try {
-      // 创建 NULS 网络会话
-      this.session = await this.nabox.createSession()
-      console.log('this.session:',this.session)
-      if (!this.session || !this.session[0]) {
-        throw new Error('Account not found')
-      }
-      this.chainId = this.session[0].indexOf('tNULS') >-1 ? 2:1 
-
-      return this.session[0]
-    } catch (error) {
-      console.error('Failed to connect to NABOX:', error)
-      throw new Error(error.message || 'Failed to connect to wallet, please try again')
-    }
-  }
+  const isConnected = computed(() => !!account.value)
+  const shortAddress = computed(() => {
+    if (!account.value) return ''
+    return `${account.value.slice(0, 6)}...${account.value.slice(-4)}`
+  })
+  const primaryDomainOmit = computed(() => {
+    if (!primaryDomain.value) return ''
+    else if(primaryDomain.value.length > 20) return `${primaryDomain.value.slice(0, 4)}...${primaryDomain.value.slice(-8)}`
+    else return primaryDomain.value;
+    
+  })
   
-  // 获取已连接的账户
-  async getAccount() {
-    if (!this.isNaboxInstalled()) {
-      return null
+  const currentChainConfig = computed(() => {
+    if (!chainInfo.value) return ''
+    return CHAINS[chainInfo.value.chainId*1];
+  })
+
+  async function connect() {
+    if (!walletService.isNaboxInstalled()) {
+      error.value = 'Please install NABOX wallet'
+      // window.open(NABOX_DOWNLOAD_URL, '_blank')
+      return;
     }
     try {
-      if (!this.session) {
-        this.session = await this.nabox.createSession()
-      }
-      this.chainId = this.session[0].indexOf('tNULS') >-1 ? 2:1 
-      return this.session[0]
-    } catch (error) {
-      console.warn('Failed to obtain NABOX account:', error)
-      return null
+      isConnecting.value = true
+      error.value = null
+      account.value = await walletService.connect();
+      console.log('account address:',account.value)
+      accountPub.value = await walletService.getPub(account.value);
+      console.log('account Pub:',accountPub.value)
+      chainInfo.value = await walletService.getChainInfo()
+      console.log('getChainInfo:',chainInfo.value)
+      // 设置监听器
+      setupEventListeners()
+      // 检查网络状态
+      await checkNetwork()
+
+    } catch (err) {
+      error.value = err.message || 'Failed to connect to wallet'
+      console.error('Failed to connect to wallet:', err)
+      account.value = null
+      chainInfo.value = null
+    } finally {
+      isConnecting.value = false
     }
   }
-  async getPub(accountAddress){
+
+  async function getBalance(){
+    const balance = await walletService.getNulsBalance();
+    // console.log('balance:',{balance,nulsUsd})
+    nulsBalance.value = balance
+    return balance
+  }
+  async function getNulsUsdPrice(){
+    const nulsUsd = await api.nulsUsd();
+    nulsUsdPrice.value = nulsUsd
+    return nulsUsd
+  }
+
+  function setupEventListeners() {
+    walletService.onAccountsChanged((accounts) => {
+      account.value = accounts[0] || null
+      if (!accounts[0]) {
+        disconnect()
+      }
+    })
+
+    walletService.onChainChanged(async () => {
+      try {
+        const info = await walletService.getChainInfo()
+        chainInfo.value = info
+        await checkNetwork()
+      } catch (err) {
+        console.error('Chain update failed:', err)
+        disconnect()
+      }
+    })
+  }
+
+  async function checkNetwork() {
+    const status = await walletService.checkNetworkStatus()
+    networkStatus.value = status
+    
+    if (!status.connected || status.error) {
+      error.value = status.error || 'Network connection failed'
+    }
+  }
+
+  function disconnect() {
+    account.value = null
+    chainInfo.value = null
+    error.value = null
+    networkStatus.value = { connected: false, chainId: null, error: null }
+    clearInterval(intervalId.value);
+    walletService.disconnect()
+  }
+  async function getPub(accountAddress){
     try {
-      const accountPub = await nabox.getPub({address:accountAddress});
-      console.log('accountPub:',accountPub);
-      return accountPub;
+     return await walletService.getPub(accountAddress || account.value)
     } catch (error) {
-      console.error('Failed to obtain public key:', error)
-      return null
+      throw new Error(error)
+    }
+  }
+  async function invokeView(data){
+    try {
+     return await walletService.nabox.invokeView(data)
+    } catch (error) {
+      throw new Error(error)
+    }
+  }
+  async function contractCall(data){
+    try {
+     const result = await walletService.nabox.contractCall(data)
+     console.log('contractCall result:',error)
+     return result;
+    } catch (error) {
+      console.error('contractCall error:',error)
+      throw new Error(error)
+    }
+  }
+  async function uploadJson(data={}) {
+    try {
+      return await api.uploadJson(data)
+     } catch (error) {
+       throw new Error(error)
+     }
+  }
+  async function uploadFile(file) {
+    try {
+      return await api.uploadFile(file)
+     } catch (error) {
+       throw new Error(error)
+     }
+  }
+  async function getFile(hash) {
+    try {
+      return await api.getFile(hash)
+     } catch (error) {
+       throw new Error(error)
+     }
+  }
+  async function loadDomains() {
+    try {
+      const data = {
+        contractAddress: currentChainConfig.value.contracts.domainAddress,
+        methodName: "userDomains",
+        methodDesc: "",
+        args: [account.value]
+      }
+      let result = await invokeView(data)
+      if(!result.result) throw result;
+      result = JSON.parse(result.result)
+      console.log('result:',result)
+      if(!result) return;
+      const activeDomains = result.activeDomains.map(domain=>({
+        name:domain,
+        isPrimary:result.mainDomain === domain?true:false,
+        rewardsActive:true,
+        showActions: false
+      }))
+      const inactiveDomains = result.inactiveDomains.map(domain=>({
+        name:domain,
+        isPrimary:result.mainDomain === domain?true:false,
+        rewardsActive:false,
+        showActions: false
+      }))
+      primaryDomain.value = result.mainDomain;
+      userUri.value = result.uri;
+      domains.value = [...activeDomains,...inactiveDomains] 
+      return domains;
+    } catch (error) {
+      console.log('loadDomains error:',error)
+      return []
     }
     
   }
-  // 获取链信息
-  async getChainInfo() {
-    if (!this.isNaboxInstalled()) {
-      throw new Error('NABOX wallet not detected')
-    }
-
+  async function loadRewards() {
     try {
-      if (!this.session) {
-        this.session = await this.nabox.createSession()
-      }
-      return {
-        chainId: this.chainId,
-        chainName: this.chainName
-      }
-    } catch (error) {
-      console.error('Failed to obtain chain information:', error)
-      throw new Error('Failed to obtain chain information')
-    }
-  }
-
-  // 发送交易
-  async sendTransaction(transaction) {
-    if (!this.isNaboxInstalled()) {
-      throw new Error('Please install NABOX wallet first')
-    }
-
-    try {
-      if (!this.session) {
-        this.session = await this.nabox.createSession()
-      }
-
-      const txHash = await this.session.sendTransaction(transaction)
-      return txHash
-    } catch (error) {
-      console.error('Send transaction failed:', error)
-      throw new Error(error.message || 'Send transaction failed')
-    }
-  }
-
-  // 监听账户变更
-  onAccountsChanged(callback) {
-    if (this.isNaboxInstalled()) {
-      this.nabox.on('accountsChanged', (accounts) => {
-        console.log('accountsChanged:',accounts)
-        try {
-          if (accounts.length) {
-            callback([accounts[0]])
-          } else {
-            callback([])
-          }
-        } catch (error) {
-          console.error('Account change processing failed:', error)
-          callback([])
-        }
-      })
-    }
-  }
-
-  // 监听链变更
-  onChainChanged(callback) {
-    if (this.isNaboxInstalled()) {
-      this.nabox.on('chainChanged', (chainId) => {
-        try {
-          console.log('onChainChanged:',chainId)
-          const chainInfo = {
-            chainId: chainId,
-            chainName: this.chainName
-          }
-          callback(chainInfo)
-        } catch (error) {
-          console.error('Chain change processing failed:', error)
-        }
-      })
-    }
-  }
-
-  // 移除事件监听
-  removeListeners() {
-    if (this.isNaboxInstalled()) {
-      try {
-        this.nabox.removeAllListeners()
-        this.session = null
-      } catch (error) {
-        console.warn('Failed to remove event listener:', error)
-      }
-    }
-  }
-// 切换指定网络 chainId = 1/2
-  async switchChain() {
-    if (!this.isNaboxInstalled()) {
-      return { connected: false, chainId: null, error: 'No wallet installed' }
-    }
-    try {
-      console.log('switchChain:',CURRENT_NETWORK.chainId)
-      await this.nabox.switchChain({chainId:CURRENT_NETWORK.chainId})
-    } catch (error) {
-      console.error(error)
-    }
-  }
-  // 检查网络连接状态
-  async checkNetworkStatus() {
-    if (!this.isNaboxInstalled()) {
-      return { connected: false, chainId: null, error: 'No wallet installed' }
-    }
-
-    try {
-      if (!this.session) {
-        this.session = await this.nabox.createSession()
-      }
-
-      return { 
-        connected: true, 
-        chainId: this.chainId,
-        error: null 
-      }
-    } catch (error) {
-      return { 
-        connected: false, 
-        chainId: null, 
-        error: error.message || '网络连接失败'
-      }
-    }
-  }
-
-  // 获取 NULS 余额
-  async getNulsBalance() {
-    if (!this.isNaboxInstalled()) {
-      return '0'
-    }
-    try {
-      if (!this.session) {
-        this.session = await this.nabox.createSession()
-      }
-      // 构建 API 请求 URL
-      const url = `${CHAINS[this.chainId].rpc}/api/accountledger/balance/${this.session[0]}`;
       const data = {
-        "assetChainId" : this.chainId,
-        "assetId" : 1
+        contractAddress: currentChainConfig.value.contracts.domainAddress,
+        methodDesc: "",
+        args: [account.value]
       }
-      // 发送请求
-      const response = await sendRequest(url, { method: 'post',data:data });
-      if(!response.success) throw response
-      return response.data.total;
+      const [received, pending] = await Promise.all([
+        invokeView({...data, methodName: "getUserRewardReceived"}),
+        invokeView({...data, methodName: "pendingAward"})
+      ])
+      console.log('Rewards:',{received:received.result,pending:pending.result})
+      totalRewards.value = fromAmount(received.result)
+      unclaimedRewards.value =  fromAmount(pending.result)
+      // TODO: Add USD conversion
+      totalRewardsUsd.value = formatUsd(totalRewards.value * nulsUsdPrice.value)
+      unclaimedRewardsUsd.value = formatUsd(unclaimedRewards.value * nulsUsdPrice.value)
+      return {
+        totalRewards,
+        unclaimedRewards,
+        totalRewardsUsd,
+        unclaimedRewardsUsd
+      }
     } catch (error) {
-      console.error('Failed to obtain balance:', error)
-      return 0
+      console.error('Failed to load rewards:', error)
+      throw new Error(error)
+    } 
+  }
+  async function loadUserProfile(){
+    if(!account.value) return;
+    try {
+      const {result} = await invokeView({
+        contractAddress: currentChainConfig.value.contracts.domainAddress,
+        methodName: "userURI",
+        args: [account.value]
+      })
+      console.log('userURI:',result)
+      userUri.value = result || ''
+      if(!result) return;
+      const {data:userProfile} = await getFile(userUri.value)
+      
+      console.log('userProfile:',userProfile)
+      // if (userProfile) {
+      //   description.value = userProfile.description || ''
+      //   location.value = userProfile.location || ''
+      //   socials.value = userProfile.socials || { twitter: '', discord: '', farcaster: '', github: '' }
+      //   websites.value = userProfile.websites || ['', '', '']
+      //   if (userProfile.avatarUrl) {
+      //     avatarUrl.value = userProfile.avatarUrl
+      //     avatarUriHash.value = userProfile.avatarUriHash
+      //   }
+      // }
+      return userProfile
+    } catch (error) {
+      console.error('Failed to load profile:', error)
+      // toast.show('Failed to load profile', 'error')
+      return;
     }
   }
-
-  // 断开连接
-  disconnect() {
-    if (this.session) {
-      this.session = null
-    }
-    this.removeListeners()
-  }
-  // 暴露Nabox对象
   
-}
+  // 初始化钱包
+  async function init() {
+    if (walletService.isNaboxInstalled()) {
+      try {
+        //切换到指定网络
+        await walletService.switchChain()
+        const currentAccount = await walletService.getAccount()
+        if (currentAccount) {
+          account.value = currentAccount;
+          accountPub.value = await walletService.getPub(currentAccount);
+          chainInfo.value = await walletService.getChainInfo();
+          console.log('walletInfo:',{...chainInfo.value,...{currentAccount:account.value,accountPub:accountPub.value}});
+          await checkNetwork()
+          setupEventListeners()
+          //定时拉取数据,退出钱包需要清除定时任务
+          intervalId.value = setInterval(() => {
+            getBalance()
+            getNulsUsdPrice()
+            loadRewards()
+          }, 5000);
+          loadDomains()
+          // setInterval(getBalance,5000)
+          // setInterval(getNulsUsdPrice,5000)
+          // setInterval(loadRewards,5000)
+          // setInterval(loadDomains,5000)
+        }
+      } catch (err) {
+        console.warn('Wallet initialization failed:', err)
+        disconnect()
+      }
+    }
+  }
 
-export const walletService = new WalletService()
+  return {
+    account,
+    accountPub,
+    chainInfo,
+    networkStatus,
+    isConnecting,
+    error,
+    isConnected,
+    userUri,
+    primaryDomain,
+    primaryDomainOmit,
+    shortAddress,
+    getPub,
+    connect,
+    disconnect,
+    init,
+    checkNetwork,
+    invokeView,
+    contractCall,
+    currentChainConfig,
+    nulsBalance,
+    nulsUsdPrice,
+    domains,
+    loadDomains,
+    loadRewards,
+    totalRewards,
+    totalRewardsUsd,
+    unclaimedRewards,
+    unclaimedRewardsUsd,
+    uploadJson,
+    uploadFile,
+    getFile,
+    loadUserProfile
+  }
+})
