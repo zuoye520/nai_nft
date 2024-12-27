@@ -1,0 +1,98 @@
+<template>
+  <div class="min-h-screen py-12 bg-black">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold text-white mb-6">Refer Friends</h1>
+        <p class="text-xl text-gray-400">
+          Earn rewards when your friends mint or trade NFTs
+        </p>
+      </div>
+
+      <!-- Referral Link Card -->
+      <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800 mb-12">
+        <h2 class="text-xl font-semibold text-white mb-4">Your Referral Link</h2>
+        <div class="flex items-center space-x-2">
+          <input
+            type="text"
+            :value="referralLink"
+            readonly
+            class="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white"
+          />
+          <button
+            @click="copyReferralLink"
+            class="px-4 py-3 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+          >
+            <DocumentDuplicateIcon class="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Referral Stats -->
+      <div class="grid grid-cols-2 gap-6 mb-12">
+        <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+          <div class="text-gray-400 mb-2">Total Referrals</div>
+          <div class="text-2xl font-bold text-white">{{ stats.totalReferrals }}</div>
+        </div>
+        <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+          <div class="text-gray-400 mb-2">Total Earnings</div>
+          <div class="text-2xl font-bold text-green-400">{{ stats.totalEarnings }} NULS</div>
+        </div>
+      </div>
+
+      <!-- Referral History -->
+      <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+        <h2 class="text-xl font-semibold text-white mb-6">Referral History</h2>
+        <div class="space-y-4">
+          <div v-for="(referral, index) in referralHistory" :key="index" 
+            class="flex justify-between items-start py-4 border-b border-gray-800 last:border-0">
+            <div>
+              <div class="text-white mb-1">{{ referral.user }}</div>
+              <div class="text-sm text-gray-400">{{ referral.date }}</div>
+            </div>
+            <div class="text-green-400 font-medium">
+              +{{ referral.reward }} NULS
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref } from 'vue'
+import { DocumentDuplicateIcon } from '@heroicons/vue/24/outline'
+import { useWalletStore } from '../stores/wallet'
+
+const store = useWalletStore()
+
+const referralLink = `https://nuls.io?ref=${store.address}`
+
+const stats = ref({
+  totalReferrals: 5,
+  totalEarnings: '0.00975'
+})
+
+const referralHistory = ref([
+  {
+    user: 'NULSd6Hg...Bq97',
+    date: '2024.01.26 10:44:07',
+    reward: '0.00606'
+  },
+  {
+    user: 'NULSd6Hg...Xy42',
+    date: '2024.01.25 14:55:14',
+    reward: '0.00369'
+  }
+])
+
+const copyReferralLink = async () => {
+  try {
+    await navigator.clipboard.writeText(referralLink)
+    // Could add a toast notification here
+  } catch (error) {
+    console.error('Failed to copy referral link:', error)
+  }
+}
+</script>
