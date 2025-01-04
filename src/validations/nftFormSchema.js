@@ -11,7 +11,7 @@ export const nftFormSchema = yup.object({
     .number()
     .required('Number of NFTs is required')
     .min(100, 'Minimum 100 NFTs required')
-    .max(10000, 'Maximum 1000 NFTs allowed'),
+    .max(10000, 'Maximum 10000 NFTs allowed'),
   
   image: yup
     .mixed()
@@ -37,20 +37,25 @@ export const nftFormSchema = yup.object({
     .min(60, 'Minimum mint percent is 60%')
     .max(80, 'Maximum mint percent is 80%')
     .typeError('Mint percent must be a number'),
-  
-  buyFee: yup
+  swapFee: yup
     .number()
-    .required('Buy fee is required')
-    .min(1, 'Minimum buy fee is 1%')
-    .max(50, 'Maximum buy fee is 50%')
-    .typeError('Buy fee must be a number'),
+    .required('Swap fee is required')
+    .min(1, 'Minimum Swap fee is 1%')
+    .max(50, 'Maximum Swap fee is 50%')
+    .typeError('Swap fee must be a number'),
+  // buyFee: yup
+  //   .number()
+  //   .required('Buy fee is required')
+  //   .min(1, 'Minimum buy fee is 1%')
+  //   .max(50, 'Maximum buy fee is 50%')
+  //   .typeError('Buy fee must be a number'),
   
-  sellFee: yup
-    .number()
-    .required('Sell fee is required')
-    .min(1, 'Minimum sell fee is 1%')
-    .max(50, 'Maximum sell fee is 50%')
-    .typeError('Sell fee must be a number'),
+  // sellFee: yup
+  //   .number()
+  //   .required('Sell fee is required')
+  //   .min(1, 'Minimum sell fee is 1%')
+  //   .max(50, 'Maximum sell fee is 50%')
+  //   .typeError('Sell fee must be a number'),
   
   description: yup
     .string()

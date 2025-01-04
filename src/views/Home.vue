@@ -19,8 +19,8 @@
           
           <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 animate-fade-in animation-delay-600">
             <CreateNFTButton />
-            <BaseButton @click="scrollToMarket" class="text-lg px-8 py-3">
-              Explore Market
+            <BaseButton class="text-lg px-8 py-3">
+              How it works?
             </BaseButton>
           </div>
         </div>
@@ -59,86 +59,40 @@
       </div>
     </div>
   </main>
+  
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, inject, getCurrentInstance, onMounted, onUnmounted, onBeforeMount, onUpdated } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useWalletStore } from '../stores/wallet'
+const walletStore = useWalletStore()
+import { useNftStore } from '../stores/nft'
+const nftStore = useNftStore()
+const { nfts} = storeToRefs(nftStore)
+
+// 获取全局配置
+const { proxy } = getCurrentInstance()
 import BaseButton from '../components/BaseButton.vue'
 import NFTCard from '../components/NFTCard.vue'
 import GradientText from '../components/GradientText.vue'
 import CreateNFTButton from '../components/CreateNFTButton.vue'
 
+onBeforeMount(() => {
+  console.log('Component will be mounted')
+})
+onMounted(() => {
+  console.log('Component mounted')
+  // initData()
+})
+//滑动到指定位置
 const marketSection = ref(null)
-
-// Added more mock data to better demonstrate the 4-column layout
-const nfts = ref([
-  {
-    id: 1,
-    name: 'GWEI Collection',
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=1&backgroundColor=b6e3f4',
-    marketValue: '416.06',
-    totalSupply: 1000,
-    mintedSupply: 600
-  },
-  {
-    id: 2,
-    name: 'AddressFlow',
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=2',
-    marketValue: '208.03',
-    totalSupply: 1000,
-    mintedSupply: 800
-  },
-  {
-    id: 3,
-    name: 'Kuleen Sideways',
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
-    marketValue: '978.00',
-    totalSupply: 1000,
-    mintedSupply: 1000
-  },
-  {
-    id: 4,
-    name: 'Princess K',
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=4',
-    marketValue: '1444.00',
-    totalSupply: 1000,
-    mintedSupply: 400
-  },
-  {
-    id: 5,
-    name: 'ACCELERATE',
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=5',
-    marketValue: '208.03',
-    totalSupply: 1000,
-    mintedSupply: 200
-  },
-  {
-    id: 6,
-    name: 'Lmao NPC',
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=6&backgroundColor=ffb238',
-    marketValue: '156.02',
-    totalSupply: 1000,
-    mintedSupply: 100
-  },
-  {
-    id: 7,
-    name: 'Crypto Punks',
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=7',
-    marketValue: '325.50',
-    totalSupply: 1000,
-    mintedSupply: 750
-  },
-  {
-    id: 8,
-    name: 'Bored Apes',
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=8',
-    marketValue: '892.30',
-    totalSupply: 1000,
-    mintedSupply: 900
-  }
-])
-
 const scrollToMarket = () => {
   marketSection.value?.scrollIntoView({ behavior: 'smooth' })
+}
+
+const initData = ()=>{
+  //获取NFT列表
+  nftStore.getNFTs()
 }
 </script>

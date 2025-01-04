@@ -5,28 +5,26 @@
       <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
         <div class="flex items-center space-x-4">
           <img 
-            :src="generateAvatarUrl(store.address)" 
-            :alt="shortenAddress(store.address)"
+            :src="proxy.$config.DEFAULT_AVATAR" 
             class="w-16 h-16 rounded-full"
           />
           <div>
-            <h1 class="text-2xl font-bold text-white">{{ shortenAddress(store.address) }}</h1>
+            <h1 class="text-2xl font-bold text-white">{{ store.shortAddress }}</h1>
             <div class="flex items-center space-x-2 mt-1">
               <button 
-                @click="copyAddress"
+                @click="store.copyAddress"
                 class="text-sm text-gray-400 hover:text-green-400 flex items-center space-x-1"
               >
                 <DocumentDuplicateIcon class="w-4 h-4" />
                 <span>Copy Address</span>
               </button>
-              <a 
-                :href="`https://nulscan.io/address/info?address=${store.address}`" 
-                target="_blank"
+              <button 
+                @click="store.openExplorer"
                 class="text-sm text-gray-400 hover:text-green-400 flex items-center space-x-1"
               >
                 <ArrowTopRightOnSquareIcon class="w-4 h-4" />
                 <span>View on NULS Explorer</span>
-              </a>
+              </button>
             </div>
           </div>
         </div>
@@ -80,69 +78,36 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useWalletStore } from '../stores/wallet'
+import { ref, onMounted,onBeforeMount,computed,getCurrentInstance } from 'vue'
+import { storeToRefs } from 'pinia'
+const { proxy } = getCurrentInstance();
+
 import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import NFTCard from '../components/NFTCard.vue'
-
+import { useWalletStore } from '../stores/wallet'
 const store = useWalletStore()
-const activeTab = ref('held')
+import { useNftStore } from '../stores/nft'
+const nftStore = useNftStore()
+const { heldNFTs,createdNFTs } = storeToRefs(nftStore)
 
+const activeTab = ref('held')
 const tabs = [
   { id: 'held', name: 'NFTs Held' },
   { id: 'created', name: 'NFTs Created' }
 ]
-
-// Mock NFT data
-const heldNFTs = ref([
-  {
-    id: 1,
-    name: 'GWEI Collection',
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=1&backgroundColor=b6e3f4',
-    marketValue: '416.06',
-    totalSupply: 1000,
-    mintedSupply: 600
-  },
-  {
-    id: 2,
-    name: 'AddressFlow',
-    image: 'https://api.dicebear.com/7.x/bottts/svg?seed=2',
-    marketValue: '208.03',
-    totalSupply: 1000,
-    mintedSupply: 800
-  }
-])
-
-const createdNFTs = ref([
-  {
-    id: 3,
-    name: 'Kuleen Sideways',
-    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=3',
-    marketValue: '978.00',
-    totalSupply: 1000,
-    mintedSupply: 1000
-  }
-])
-
 const displayedNFTs = computed(() => {
   return activeTab.value === 'held' ? heldNFTs.value : createdNFTs.value
 })
 
-const generateAvatarUrl = (address) => {
-  return `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`
+onBeforeMount(() => {
+  console.log('Component will be mounted')
+})
+onMounted(() => {
+  // initData()
+})
+const initData = ()=>{
+  nftStore.getHeldNFTs()
+  nftStore.getCreatedNFTs()
 }
 
-const shortenAddress = (address) => {
-  if (!address) return ''
-  return `${address.slice(0, 8)}...${address.slice(-4)}`
-}
-
-const copyAddress = async () => {
-  try {
-    await navigator.clipboard.writeText(store.address)
-    // Could add a toast notification here
-  } catch (error) {
-    console.error('Failed to copy address:', error)
-  }
-}
 </script>

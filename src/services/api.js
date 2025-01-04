@@ -2,7 +2,7 @@
 import { sendRequest } from '../utils/httpUtils'
 import { PinataSDK } from "pinata-web3";
 
-import { BINANCE_URL,IPFS_CONFIG } from '../config'
+import { API_URL,BINANCE_URL,IPFS_CONFIG } from '../config'
 const pinata = new PinataSDK({
   pinataJwt: IPFS_CONFIG.jwt,
   pinataGateway: IPFS_CONFIG.gateway,
@@ -14,16 +14,12 @@ const pinata = new PinataSDK({
  */
 export const nulsUsd = async (symbol= 'NULSUSDT')=>{
   try {
-    // 构建 API 请求 URL
     const url = `${BINANCE_URL}/api/v3/avgPrice?symbol=${symbol}`;
-    // 发送 GET 请求获取热门列表
     const response = await sendRequest(url, { method: 'get' });
-    
     if(!response.price) throw response
     console.log('nulsUsd:',response.price)
     return response.price;
   } catch (error) {
-    // 捕获并记录任何发生的错误
     console.error('nulsUsd:', error);
     return 0;
   }
@@ -55,4 +51,92 @@ export const uploadFile = async (file)=>{
 export const getFile = async (hash)=>{
   const data = await pinata.gateways.get(hash);
   return data 
+}
+
+/**
+ * NFT API -- NFT 列表
+ * @param {*} params 
+ * @returns 
+ */
+export const nftList = async (params= {})=>{
+  const  data = {
+    "pageNum": 0,
+    "pageSize": 10,
+    "keyword": "",
+    "projectState": "Mint",
+    "orderBy": "ASC"
+  }
+  const url = `${API_URL}/nft/list`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftList result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- NFT 持有列表
+ * @param {*} params 
+ * @returns 
+ */
+export const nftHeldList = async (params= {})=>{
+  const  data = {
+    "pageNum": 0,
+    "pageSize": 10,
+  }
+  const url = `${API_URL}/user/nft/held`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftHeldList result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- NFT 创建列表
+ * @param {*} params 
+ * @returns 
+ */
+export const nftCreatedList = async (params= {})=>{
+  const  data = {
+    "pageNum": 0,
+    "pageSize": 10,
+  }
+  const url = `${API_URL}/user/nft/created`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftCreatedList result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- 老虎机奖励记录
+ * @param {*} params 
+ * @returns 
+ */
+export const historyRewards = async (params= {})=>{
+  const  data = {
+    "pageNum": 0,
+    "pageSize": 10,
+  }
+  const url = `${API_URL}/user/reward`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('historyRewards result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- 邀请奖励记录
+ * @param {*} params 
+ * @returns 
+ */
+export const historyRefers = async (params= {})=>{
+  const  data = {
+    "pageNum": 0,
+    "pageSize": 10,
+  }
+  const url = `${API_URL}/user/refer`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('historyRefers result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
 }

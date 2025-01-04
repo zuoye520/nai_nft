@@ -1,26 +1,24 @@
 <template>
   <Teleport to="body">
-    <div v-if="store.showWalletModal" class="fixed inset-0 z-50">
+    <div v-show="store.showWalletModal" class="fixed inset-0 z-50">
       <!-- Backdrop -->
       <div 
         class="absolute inset-0 bg-black/80" 
         @click="store.toggleWalletModal"
       ></div>
-      
       <!-- Modal -->
       <div class="absolute top-20 right-4 w-80 rounded-xl bg-[#1A1B1E] border border-gray-800 shadow-xl overflow-hidden">
         <!-- Header -->
         <div class="p-4 border-b border-gray-800">
           <div class="flex items-center space-x-3">
             <img 
-              :src="generateAvatarUrl(store.address)" 
-              :alt="shortenAddress(store.address)"
+              :src="proxy.$config.DEFAULT_AVATAR" 
               class="w-12 h-12 rounded-full"
             />
             <div>
-              <div class="text-white font-medium">{{ shortenAddress(store.address) }}</div>
+              <div class="text-white font-medium">{{ store.shortAddress}}</div>
               <button 
-                @click="copyAddress"
+                @click="store.copyAddress"
                 class="text-sm text-gray-400 hover:text-green-400 flex items-center space-x-1"
               >
                 <DocumentDuplicateIcon class="w-4 h-4" />
@@ -75,6 +73,8 @@
 </template>
 
 <script setup>
+import { ref,getCurrentInstance } from "vue";
+const { proxy } = getCurrentInstance();
 import { useRouter } from 'vue-router'
 import { useWalletStore } from '../../stores/wallet'
 import { 
@@ -87,24 +87,6 @@ import {
 
 const router = useRouter()
 const store = useWalletStore()
-
-const generateAvatarUrl = (address) => {
-  return `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`
-}
-
-const shortenAddress = (address) => {
-  if (!address) return ''
-  return `${address.slice(0, 8)}...${address.slice(-4)}`
-}
-
-const copyAddress = async () => {
-  try {
-    await navigator.clipboard.writeText(store.address)
-    // Could add a toast notification here
-  } catch (error) {
-    console.error('Failed to copy address:', error)
-  }
-}
 
 const handleDisconnect = () => {
   store.disconnect()

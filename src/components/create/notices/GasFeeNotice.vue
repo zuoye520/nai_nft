@@ -5,9 +5,9 @@
         <InformationCircleIcon class="h-5 w-5 text-green-400" aria-hidden="true" />
       </div>
       <div class="ml-3">
-        <h3 class="text-sm font-medium text-green-400">Gas Fee Information</h3>
+        <h3 class="text-sm font-medium text-green-400">Fee Information</h3>
         <div class="mt-2 text-sm text-gray-300">
-          <p>Create gas fee: <span class="font-semibold text-green-400">10 NULS</span></p>
+          <p>Create fee: <span class="font-semibold text-green-400">10 NULS</span></p>
         </div>
       </div>
     </div>

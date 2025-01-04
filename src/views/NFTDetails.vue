@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,onBeforeMount } from 'vue'
 import { useRoute } from 'vue-router'
 import NFTHeader from '../components/nft-details/NFTHeader.vue'
 import TabButton from '../components/nft-details/TabButton.vue'
@@ -60,8 +60,12 @@ const tabs = [
   { id: 'replies', name: 'Reply' },
   { id: 'holders', name: 'Holders' }
 ]
-
+onBeforeMount(() => {
+  console.log('Component will be mounted')
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+})
 onMounted(() => {
+  
   fetchNFTDetails()
 })
 </script>

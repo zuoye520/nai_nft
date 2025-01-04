@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-6">
-    <FormField
+    <!-- <FormField
       id="buy-fee"
       label="Buy Fee (%)"
       type="number"
@@ -28,6 +28,21 @@
       required
       @blur="$emit('blur', 'sellFee')"
       @update:modelValue="updateField('sellFee', $event)"
+    /> -->
+
+    <FormField
+      id="swap-fee"
+      label="Swap Fee (%)"
+      type="number"
+      v-model="values.swapFee"
+      :error="errors.swapFee"
+      placeholder="1~50"
+      min="1"
+      max="50"
+      step="0.1"
+      required
+      @blur="$emit('blur', 'swapFee')"
+      @update:modelValue="updateField('swapFee', $event)"
     />
   </div>
 </template>

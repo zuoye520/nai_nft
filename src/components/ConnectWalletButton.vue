@@ -52,22 +52,21 @@
       class="flex items-center space-x-3 px-4 py-2 rounded-xl bg-gray-900/50 border border-gray-800 hover:border-green-500/30 transition-all"
     >
       <img 
-        :src="generateAvatarUrl(store.address)" 
-        :alt="shortenAddress(store.address)"
+        :src="proxy.$config.DEFAULT_AVATAR" 
         class="w-8 h-8 rounded-full"
       />
-      <span class="text-white">{{ shortenAddress(store.shortAddress) }}</span>
+      <span class="text-white">{{ store.shortAddress }}</span>
     </button>
   </div>
 </template>
 
 <script setup>
+import { ref,getCurrentInstance } from 'vue'
+const { proxy } = getCurrentInstance();
 import { storeToRefs } from 'pinia'
 import { WalletIcon } from '@heroicons/vue/24/outline'
 import { useWalletStore } from '../stores/wallet'
-
 const store = useWalletStore()
-const { isConnected } = storeToRefs(store)
 
 const particleStyles = [
   { background: '#c6ff00', top: '20%', left: '10%' },
@@ -77,15 +76,6 @@ const particleStyles = [
   { background: '#c6ff00', bottom: '40%', right: '30%' },
   { background: '#a2e838', top: '50%', left: '20%' }
 ]
-
-const generateAvatarUrl = (address) => {
-  return `https://api.dicebear.com/7.x/identicon/svg?seed=${address}`
-}
-
-const shortenAddress = (address) => {
-  if (!address) return ''
-  return `${address.slice(0, 8)}...${address.slice(-4)}`
-}
 </script>
 
 <style scoped>

@@ -14,7 +14,7 @@
         <div class="flex items-center justify-between">
           <div>
             <div class="text-white/80 mb-2">Total Rewards</div>
-            <div class="text-3xl font-bold text-white">{{ store.rewards }} NULS</div>
+            <div class="text-3xl font-bold text-white">{{ rewards }} NULS</div>
           </div>
           <button 
             class="px-6 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-colors"
@@ -49,31 +49,28 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted,onBeforeMount,getCurrentInstance } from 'vue'
+import { storeToRefs } from 'pinia'
+const { proxy } = getCurrentInstance();
 import { useWalletStore } from '../stores/wallet'
-
 const store = useWalletStore()
 
-const rewardHistory = ref([
-  {
-    type: 'Lucky Bonus',
-    date: '2024.01.26 10:44:07',
-    amount: '+0.00606'
-  },
-  {
-    type: 'Mint Reward',
-    date: '2024.01.25 14:55:14',
-    amount: '+0.00369'
-  },
-  {
-    type: 'Withdrawal',
-    date: '2024.01.24 09:33:38',
-    amount: '-0.65688'
-  }
-])
+import { useRewardsStore } from '../stores/rewards'
+const rewardsStore = useRewardsStore()
+const { rewards,rewardHistory } = storeToRefs(rewardsStore)
 
-const handleWithdraw = () => {
-  // Handle withdrawal logic
+onBeforeMount(() => {
+  console.log('Component will be mounted')
+})
+onMounted(() => {
+  // initData()
+})
+const initData = ()=>{
+  rewardHistory.getHistoryRewards()
+}
+
+const handleWithdraw = async () => {
+  await rewardsStore.receiveTiger()
   console.log('Withdrawing rewards')
 }
 </script>

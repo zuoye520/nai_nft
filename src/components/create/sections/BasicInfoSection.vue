@@ -17,9 +17,9 @@
       type="number"
       v-model="values.nftCount"
       :error="errors.nftCount"
-      placeholder="100~1000"
+      placeholder="100~10000"
       min="100"
-      max="1000"
+      max="10000"
       required
       @blur="$emit('blur', 'nftCount')"
       @update:modelValue="updateField('nftCount', $event)"

@@ -15,12 +15,12 @@
         <div class="flex items-center space-x-2">
           <input
             type="text"
-            :value="referralLink"
+            :value="referStore.referralLink"
             readonly
             class="flex-1 bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white"
           />
           <button
-            @click="copyReferralLink"
+            @click="referStore.copyReferralLink"
             class="px-4 py-3 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
           >
             <DocumentDuplicateIcon class="w-5 h-5" />
@@ -32,11 +32,11 @@
       <div class="grid grid-cols-2 gap-6 mb-12">
         <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
           <div class="text-gray-400 mb-2">Total Referrals</div>
-          <div class="text-2xl font-bold text-white">{{ stats.totalReferrals }}</div>
+          <div class="text-2xl font-bold text-white">{{ referStore.stats.totalReferrals }}</div>
         </div>
         <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
           <div class="text-gray-400 mb-2">Total Earnings</div>
-          <div class="text-2xl font-bold text-green-400">{{ stats.totalEarnings }} NULS</div>
+          <div class="text-2xl font-bold text-green-400">{{ referStore.stats.totalEarnings }} NULS</div>
         </div>
       </div>
 
@@ -44,7 +44,7 @@
       <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
         <h2 class="text-xl font-semibold text-white mb-6">Referral History</h2>
         <div class="space-y-4">
-          <div v-for="(referral, index) in referralHistory" :key="index" 
+          <div v-for="(referral, index) in referStore.referralHistory" :key="index" 
             class="flex justify-between items-start py-4 border-b border-gray-800 last:border-0">
             <div>
               <div class="text-white mb-1">{{ referral.user }}</div>
@@ -61,38 +61,25 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+
+import { ref, onMounted,onBeforeMount,getCurrentInstance } from 'vue'
 import { DocumentDuplicateIcon } from '@heroicons/vue/24/outline'
+import { storeToRefs } from 'pinia'
+const { proxy } = getCurrentInstance();
 import { useWalletStore } from '../stores/wallet'
-
 const store = useWalletStore()
+import { useReferStore } from '../stores/refer'
+const referStore = useReferStore()
 
-const referralLink = `https://nuls.io?ref=${store.address}`
 
-const stats = ref({
-  totalReferrals: 5,
-  totalEarnings: '0.00975'
+onBeforeMount(() => {
+  console.log('Component will be mounted')
 })
-
-const referralHistory = ref([
-  {
-    user: 'NULSd6Hg...Bq97',
-    date: '2024.01.26 10:44:07',
-    reward: '0.00606'
-  },
-  {
-    user: 'NULSd6Hg...Xy42',
-    date: '2024.01.25 14:55:14',
-    reward: '0.00369'
-  }
-])
-
-const copyReferralLink = async () => {
-  try {
-    await navigator.clipboard.writeText(referralLink)
-    // Could add a toast notification here
-  } catch (error) {
-    console.error('Failed to copy referral link:', error)
-  }
+onMounted(() => {
+  // initData()
+})
+const initData = async ()=>{
+  await referStore.getHistoryRefers()
 }
+
 </script>

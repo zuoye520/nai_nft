@@ -12,13 +12,14 @@ export function useNFTValidation() {
     validationSchema: nftFormSchema,
     validateOnBlur: true,    // 失焦验证
     validateOnChange: true,  // 值变化时验证
-    validateOnMount: false,   // 取消挂载时验证
+    validateOnMount: false,   // 挂载时验证
     initialValues: {
       collectionName: '',
       nftCount: '',
       image: null,
       mintPrice: '',
       mintPercent: '',
+      swapFee:'',
       buyFee: '',
       sellFee: '',
       description: '',
