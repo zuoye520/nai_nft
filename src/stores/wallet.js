@@ -60,7 +60,7 @@ export const useWalletStore = defineStore('wallet', () => {
       const nonce = await authStore.loginNonce(account.value)
       console.log('nonce:',nonce)
       //开始签名
-      const signData = await walletService.nabox.signMessage(['12345', account.value])
+      const signData = await walletService.nabox.signMessage([nonce, account.value])
       console.log('signData:',signData)
 
       // const user = await authStore.login({
