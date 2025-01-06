@@ -6,7 +6,11 @@ import * as api from '../services/api'
 import {fromAmount,formatUsd} from '../utils/format'
 
 import { CHAINS ,NABOX_DOWNLOAD_URL} from '../config'
+
+import { useAuthStore } from './auth';
 export const useWalletStore = defineStore('wallet', () => {
+  const authStore = useAuthStore();
+
   const intervalId = ref(null)
   const account = ref(null)
   const accountPub = ref(null)
@@ -16,32 +20,16 @@ export const useWalletStore = defineStore('wallet', () => {
   const error = ref(null)
   const nulsBalance = ref(0)
   const nulsUsdPrice = ref(0)
-  // 域名列表数据
-  const domains = ref([])
-  const primaryDomain = ref('')
-  const userUri = ref('')
 
-  // 奖励数据
-  const totalRewards = ref('0')
-  const totalRewardsUsd = ref('0')
-  const unclaimedRewards = ref('0')
-  const unclaimedRewardsUsd = ref('0')
   //钱包弹层
   const showWalletModal = ref(false)
   function toggleWalletModal() {
-    console.log(111)
     showWalletModal.value = !showWalletModal.value
   }
   const isConnected = computed(() => !!account.value)
   const shortAddress = computed(() => {
     if (!account.value) return ''
     return `${account.value.slice(0, 6)}...${account.value.slice(-4)}`
-  })
-  const primaryDomainOmit = computed(() => {
-    if (!primaryDomain.value) return ''
-    else if(primaryDomain.value.length > 20) return `${primaryDomain.value.slice(0, 4)}...${primaryDomain.value.slice(-8)}`
-    else return primaryDomain.value;
-    
   })
   
   const currentChainConfig = computed(() => {
@@ -68,6 +56,21 @@ export const useWalletStore = defineStore('wallet', () => {
       setupEventListeners()
       // 检查网络状态
       await checkNetwork()
+      //获取nonce值
+      const nonce = await authStore.loginNonce(account.value)
+      console.log('nonce:',nonce)
+      //开始签名
+      const signData = await walletService.nabox.signMessage(['12345', account.value])
+      console.log('signData:',signData)
+
+      // const user = await authStore.login({
+      //   "address": account.value,
+      //   "pubKey": accountPub.value,
+      //   "nonce": nonce,
+      //   "signData": signData,
+      //   "inviteCode": ""
+      // })
+      // console.log('nonce:',nonce)
 
     } catch (err) {
       error.value = err.message || 'Failed to connect to wallet'
@@ -79,17 +82,16 @@ export const useWalletStore = defineStore('wallet', () => {
     }
   }
 
-  async function getBalance(){
-    const balance = await walletService.getNulsBalance();
-    // console.log('balance:',{balance,nulsUsd})
-    nulsBalance.value = balance
-    return balance
-  }
-  async function getNulsUsdPrice(){
-    const nulsUsd = await api.nulsUsd();
-    nulsUsdPrice.value = nulsUsd
-    return nulsUsd
-  }
+  // async function getBalance(){
+  //   const balance = await walletService.getNulsBalance();
+  //   nulsBalance.value = balance
+  //   return balance
+  // }
+  // async function getNulsUsdPrice(){
+  //   const nulsUsd = await api.nulsUsd();
+  //   nulsUsdPrice.value = nulsUsd
+  //   return nulsUsd
+  // }
 
   function setupEventListeners() {
     walletService.onAccountsChanged((accounts) => {
@@ -189,101 +191,7 @@ export const useWalletStore = defineStore('wallet', () => {
        throw new Error(error)
      }
   }
-  async function loadDomains() {
-    try {
-      const data = {
-        contractAddress: currentChainConfig.value.contracts.domainAddress,
-        methodName: "userDomains",
-        methodDesc: "",
-        args: [account.value]
-      }
-      let result = await invokeView(data)
-      if(!result.result) throw result;
-      result = JSON.parse(result.result)
-      console.log('result:',result)
-      if(!result) return;
-      const activeDomains = result.activeDomains.map(domain=>({
-        name:domain,
-        isPrimary:result.mainDomain === domain?true:false,
-        rewardsActive:true,
-        showActions: false
-      }))
-      const inactiveDomains = result.inactiveDomains.map(domain=>({
-        name:domain,
-        isPrimary:result.mainDomain === domain?true:false,
-        rewardsActive:false,
-        showActions: false
-      }))
-      primaryDomain.value = result.mainDomain;
-      userUri.value = result.uri;
-      domains.value = [...activeDomains,...inactiveDomains] 
-      return domains;
-    } catch (error) {
-      console.log('loadDomains error:',error)
-      return []
-    }
-    
-  }
-  async function loadRewards() {
-    try {
-      const data = {
-        contractAddress: currentChainConfig.value.contracts.domainAddress,
-        methodDesc: "",
-        args: [account.value]
-      }
-      const [received, pending] = await Promise.all([
-        invokeView({...data, methodName: "getUserRewardReceived"}),
-        invokeView({...data, methodName: "pendingAward"})
-      ])
-      console.log('Rewards:',{received:received.result,pending:pending.result})
-      totalRewards.value = fromAmount(received.result)
-      unclaimedRewards.value =  fromAmount(pending.result)
-      // TODO: Add USD conversion
-      totalRewardsUsd.value = formatUsd(totalRewards.value * nulsUsdPrice.value)
-      unclaimedRewardsUsd.value = formatUsd(unclaimedRewards.value * nulsUsdPrice.value)
-      return {
-        totalRewards,
-        unclaimedRewards,
-        totalRewardsUsd,
-        unclaimedRewardsUsd
-      }
-    } catch (error) {
-      console.error('Failed to load rewards:', error)
-      throw new Error(error)
-    } 
-  }
-  async function loadUserProfile(){
-    if(!account.value) return;
-    try {
-      const {result} = await invokeView({
-        contractAddress: currentChainConfig.value.contracts.domainAddress,
-        methodName: "userURI",
-        args: [account.value]
-      })
-      console.log('userURI:',result)
-      userUri.value = result || ''
-      if(!result) return;
-      const {data:userProfile} = await getFile(userUri.value)
-      
-      console.log('userProfile:',userProfile)
-      // if (userProfile) {
-      //   description.value = userProfile.description || ''
-      //   location.value = userProfile.location || ''
-      //   socials.value = userProfile.socials || { twitter: '', discord: '', farcaster: '', github: '' }
-      //   websites.value = userProfile.websites || ['', '', '']
-      //   if (userProfile.avatarUrl) {
-      //     avatarUrl.value = userProfile.avatarUrl
-      //     avatarUriHash.value = userProfile.avatarUriHash
-      //   }
-      // }
-      return userProfile
-    } catch (error) {
-      console.error('Failed to load profile:', error)
-      // toast.show('Failed to load profile', 'error')
-      return;
-    }
-  }
-  
+
   // 初始化钱包
   async function init() {
     if (walletService.isNaboxInstalled()) {
@@ -325,9 +233,6 @@ export const useWalletStore = defineStore('wallet', () => {
     isConnecting,
     error,
     isConnected,
-    userUri,
-    primaryDomain,
-    primaryDomainOmit,
     shortAddress,
     getPub,
     connect,
@@ -341,17 +246,9 @@ export const useWalletStore = defineStore('wallet', () => {
     currentChainConfig,
     nulsBalance,
     nulsUsdPrice,
-    domains,
-    loadDomains,
-    loadRewards,
-    totalRewards,
-    totalRewardsUsd,
-    unclaimedRewards,
-    unclaimedRewardsUsd,
     uploadJson,
     uploadFile,
     getFile,
-    loadUserProfile,
     showWalletModal,
     toggleWalletModal
   }

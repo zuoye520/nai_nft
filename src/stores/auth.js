@@ -1,15 +1,22 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-
+import * as api from '../services/api'
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(null)
   const isLoggedIn = ref(false)
-
-  function login(userData) {
-    user.value = userData
-    isLoggedIn.value = true
+  //获取登录nonce值
+  async function loginNonce(address) {
+    const nonce = await api.loginNonce({address})
+    return nonce;
   }
-
+  //登录
+  async function login(params) {
+    const userInfo = await api.login(params)
+    user.value = userInfo;
+    isLoggedIn.value = true
+    return userInfo
+  }
+  //退出登录
   function logout() {
     user.value = null
     isLoggedIn.value = false
@@ -18,6 +25,7 @@ export const useAuthStore = defineStore('auth', () => {
   return {
     user,
     isLoggedIn,
+    loginNonce,
     login,
     logout
   }

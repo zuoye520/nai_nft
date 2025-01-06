@@ -53,6 +53,38 @@ export const getFile = async (hash)=>{
   return data 
 }
 
+
+
+/**
+ * NFT API -- 获取nonce
+ * @param {*} params 
+ * @returns 
+ */
+export const loginNonce = async (params= {})=>{
+  const  data = {
+    "address": params.address,
+  }
+  const url = `${API_URL}/login/nonce`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('loginNonce result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- 登录
+ * @param {*} params 
+ * @returns 
+ */
+export const login = async (params= {})=>{
+  const  data = params;
+  const url = `${API_URL}/login`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('login result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
 /**
  * NFT API -- NFT 列表
  * @param {*} params 
