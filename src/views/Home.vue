@@ -69,7 +69,7 @@ import { useWalletStore } from '../stores/wallet'
 const walletStore = useWalletStore()
 import { useNftStore } from '../stores/nft'
 const nftStore = useNftStore()
-const { nfts} = storeToRefs(nftStore)
+const { nfts } = storeToRefs(nftStore)
 
 // 获取全局配置
 const { proxy } = getCurrentInstance()
@@ -83,7 +83,7 @@ onBeforeMount(() => {
 })
 onMounted(() => {
   console.log('Component mounted')
-  // initData()
+  initData()
 })
 //滑动到指定位置
 const marketSection = ref(null)

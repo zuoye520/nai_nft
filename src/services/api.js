@@ -44,7 +44,7 @@ export const uploadFile = async (file)=>{
   return upload;
 }
 /**
- * 上传文件到ipfs
+ * 读取文件
  * @param {*} file 
  * @returns 
  */
@@ -86,25 +86,20 @@ export const login = async (params= {})=>{
 }
 
 /**
- * NFT API -- NFT 列表
- * @param {*} params 
+ * NFT API -- 用户信息
  * @returns 
  */
-export const nftList = async (params= {})=>{
-  const  data = {
-    "pageNum": 0,
-    "pageSize": 10,
-    "keyword": "",
-    "projectState": "Mint",
-    "orderBy": "ASC"
-  }
-  const url = `${API_URL}/nft/list`;
-  const response = await sendRequest(url, { data, method: 'post' });
-  console.log('nftList result:',{data,response})
+export const userInfo = async ()=>{
+ const data ={}
+  const url = `${API_URL}/user/info`;
+  const response = await sendRequest(url, {
+    data, 
+    method: 'post'
+  });
+  console.log('userInfo result:',{data,response})
   if(!response || response.code !=0) throw response
   return response.data;
 }
-
 /**
  * NFT API -- NFT 持有列表
  * @param {*} params 
@@ -169,6 +164,126 @@ export const historyRefers = async (params= {})=>{
   const url = `${API_URL}/user/refer`;
   const response = await sendRequest(url, { data, method: 'post' });
   console.log('historyRefers result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+
+/**
+ * NFT API -- NFT 列表
+ * @param {*} params 
+ * @returns 
+ */
+export const nftList = async (params= {})=>{
+  const  data = {
+    pageNum: params.pageNum || 1,
+    pageSize: params.pageSize || 10,
+    keyword: params.keyword || "",
+    projectState: params.projectState || "Mint",
+    orderBy: params.orderBy || "ASC",
+  }
+  const url = `${API_URL}/nft/list`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftList result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- NFT 详情
+ * @param {*} id 
+ * @returns 
+ */
+export const nftInfo = async (id)=>{
+  const  data = {id}
+  const url = `${API_URL}/nft/info`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftInfo result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- NFT Txn
+ * @param {*} id 
+ * @returns 
+ */
+export const nftTxn = async (params = {})=>{
+  const  data = {
+    id:params.id,
+    pageNum: params.pageNum || 1,
+    pageSize: params.pageSize || 10,
+  }
+  const url = `${API_URL}/nft/txn`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftTxn result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- NFT Price
+ * @param {*} id 
+ * @returns 
+ */
+export const nftPrice = async (params={})=>{
+  const  data = {
+    id:params.id,
+    pageNum: params.pageNum || 1,
+    pageSize: params.pageSize || 10,
+  }
+  const url = `${API_URL}/nft/price`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftPrice result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- NFT 持有者列表
+ * @param {*} id 
+ * @returns 
+ */
+export const nftHolders = async (id)=>{
+  const  data = {id}
+  const url = `${API_URL}/nft/holders`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftHolders result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- NFT 回复列表
+ * @param {*} id 
+ * @returns 
+ */
+export const nftReplyList = async (params= {})=>{
+  const  data = {
+    id:params.id,
+    pageNum: params.pageNum || 1,
+    pageSize: params.pageSize || 10,
+  }
+  const url = `${API_URL}/nft/reply/list`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftReplyList result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
+ * NFT API -- NFT 回复
+ * @param {*} id 
+ * @returns 
+ */
+export const nftReply = async (params= {})=>{
+  const  data = {
+    nftId:params.id,
+    content:params.content,
+  }
+  const url = `${API_URL}/nft/reply`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('nftReply result:',{data,response})
   if(!response || response.code !=0) throw response
   return response.data;
 }

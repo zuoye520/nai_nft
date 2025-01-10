@@ -26,13 +26,13 @@
               <span class="text-gray-400 text-sm">{{ formatDate(reply.timestamp) }}</span>
             </div>
             <p class="mt-2 text-gray-300">{{ reply.content }}</p>
-            <div class="mt-4 flex items-center space-x-4">
+            <!-- <div class="mt-4 flex items-center space-x-4">
               <button class="text-gray-400 hover:text-gray-300 flex items-center space-x-1">
                 <HandThumbUpIcon class="w-4 h-4" />
                 <span>{{ reply.likes }}</span>
               </button>
               <button class="text-gray-400 hover:text-gray-300">Reply</button>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -42,12 +42,18 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useNftStore } from '../../../stores/nft'
+const nftStore = useNftStore()
 import { HandThumbUpIcon } from '@heroicons/vue/24/outline'
 import BaseButton from '../../BaseButton.vue'
 
-defineProps({
+const props = defineProps({
   nft: {
     type: Object,
+    required: true
+  },
+  replies: {
+    type: Array,
     required: true
   }
 })
@@ -55,32 +61,34 @@ defineProps({
 const newReply = ref('')
 
 // Mock replies data
-const replies = [
-  {
-    id: 1,
-    author: 'User1',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
-    content: 'Great NFT collection!',
-    timestamp: Date.now() - 3600000,
-    likes: 5
-  },
-  {
-    id: 2,
-    author: 'User2',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
-    content: 'Looking forward to the next drop!',
-    timestamp: Date.now() - 7200000,
-    likes: 3
-  }
-]
+// const replies = [
+//   {
+//     id: 1,
+//     author: 'User1',
+//     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
+//     content: 'Great NFT collection!',
+//     timestamp: Date.now() - 3600000,
+//     likes: 5
+//   },
+//   {
+//     id: 2,
+//     author: 'User2',
+//     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
+//     content: 'Looking forward to the next drop!',
+//     timestamp: Date.now() - 7200000,
+//     likes: 3
+//   }
+// ]
 
-const handleSubmitReply = () => {
+const handleSubmitReply = async () => {
   if (!newReply.value.trim()) return
   // Handle reply submission
   console.log('Submitting reply:', newReply.value)
+  
+  await nftStore.nftReply({id:props.nft.id,content:newReply.value})
+  await nftStore.getNftReplyList({id:props.nft.id})
   newReply.value = ''
 }
-
 const formatDate = (timestamp) => {
   return new Date(timestamp).toLocaleString()
 }

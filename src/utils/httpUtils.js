@@ -8,9 +8,14 @@ import axios from 'axios';
  */
 async function sendRequest(url, config) {
   try {
+    let userInfo = sessionStorage.getItem('userInfo')
+    if(userInfo) userInfo = JSON.parse(userInfo);
     const response = await axios({
       url,
-      ...config
+      ...config,
+      headers:{
+        token:userInfo && userInfo.token
+      }
     });
     return response.data;
   } catch (error) {

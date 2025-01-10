@@ -1,6 +1,6 @@
 <template>
   <div v-show="isChartVisible">
-    <div ref="chartRef"  style="width: 800px; height: 500px;"></div>
+    <div ref="chartRef" style="width: 800px; height: 500px;"></div>
   </div>
 </template>
 
@@ -42,9 +42,10 @@ onMounted(async () => {
       wickUpColor: '#4caf50',
       wickDownColor: '#f44336',
     });
-    // 生成 30 天的 K 线数据，从 2023-01-01 开始
-const data = generateCandlestickData('2023-01-01', 30);
-console.log(data);
+    
+    // 生成 1 天的 K 线数据
+    const data = generateCandlestickData('2023-01-01', 30);
+    console.log(data);
     
     candlestickSeries.setData(data);
   } else {
@@ -69,8 +70,11 @@ function generateCandlestickData(startDate, days) {
     const low = +(open - Math.random() * 0.2).toFixed(2);  // 随机低价
     const close = +(low + Math.random() * (high - low)).toFixed(2); // 随机收盘价
 
+    // 生成时间戳 (一天的开始时间戳)
+    const timestamp = Math.floor(date.getTime() / 1000); // 转换为 Unix 时间戳（秒）
+    
     data.push({
-      time: date.toISOString().split('T')[0], // 转换为 YYYY-MM-DD 格式
+      time: timestamp, // 使用时间戳
       open,
       high,
       low,
@@ -84,7 +88,4 @@ function generateCandlestickData(startDate, days) {
 
   return data;
 }
-
-
-
 </script>

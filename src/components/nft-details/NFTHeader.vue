@@ -3,7 +3,7 @@
     <!-- NFT Image -->
     <div class="relative">
       <div class="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden">
-        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=1&backgroundColor=b6e3f4" :alt="nft.name" class="w-full h-full object-cover">
+        <img :src="nft.image" :alt="nft.name" class="w-full h-full object-cover">
       </div>
     </div>
 
@@ -173,6 +173,11 @@
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useWalletStore } from '../../stores/wallet'
+import { storeToRefs } from 'pinia'
+const walletStore = useWalletStore()
+const { account, currentChainConfig} = storeToRefs(walletStore)
+
 import BaseButton from '../BaseButton.vue'
 
 const props = defineProps({
@@ -195,7 +200,7 @@ const isMintPhase = computed(() => {
 })
 
 const remainingSupply = computed(() => {
-  return props.nft.totalSupply - props.nft.mintedSupply
+  return  (props.nft.totalSupply * props.nft.mintPercent / 100) - props.nft.mintedSupply
 })
 
 const getFeePercentage = computed(() => {
@@ -233,9 +238,24 @@ const canSwap = computed(() => {
 const handleMint = async () => {
   try {
     console.log('Minting:', {
+      pid:props.nft.pid,
       amount: amount.value,
       totalCost: totalMintAmount.value
     })
+    const data = {
+      from: account.value,
+      value: totalMintAmount.value,//mint费用
+      contractAddress: currentChainConfig.value.contracts.mainAddress,
+      methodName: "mint",
+      args: [
+        props.nft.pid,//pid    
+        amount.value,//mint数据
+      ]
+    }
+    console.log('mint data:',data)
+    const result = await walletStore.contractCall(data)
+    console.log('mint result:',result)
+
   } catch (error) {
     console.error('Mint error:', error)
   }
@@ -248,6 +268,19 @@ const handleSwap = async () => {
       totalCost: totalSwapAmount.value,
       fee: calculateFee.value
     })
+    // const data = {
+    //   from: account.value,
+    //   value: totalMintAmount.value,//mint费用
+    //   contractAddress: currentChainConfig.value.contracts.mainAddress,
+    //   methodName: "buyToken" ,//buyToken/sellToken
+    //   args: [
+    //     props.nft.pid,//pid    
+    //     amount.value,//mint数据
+    //   ]
+    // }
+    // console.log('swap data:',data)
+    // const result = await walletStore.contractCall(data)
+    // console.log('swap result:',result)
   } catch (error) {
     console.error('Swap error:', error)
   }

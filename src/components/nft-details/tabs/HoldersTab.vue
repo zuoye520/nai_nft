@@ -27,17 +27,12 @@ defineProps({
   nft: {
     type: Object,
     required: true
-  }
+  },
+  holders: {
+    type: Array,
+    required: true
+  },
 })
-
-// Mock holders data
-const holders = Array.from({ length: 20 }, (_, i) => ({
-  address: `0x${Math.random().toString(16).slice(2, 42)}`,
-  avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${i}`,
-  balance: Math.floor(Math.random() * 100),
-  percentage: ((Math.random() * 10) + 1).toFixed(2),
-  joinDate: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
-})).sort((a, b) => b.balance - a.balance)
 
 const shortenAddress = (address) => {
   return `${address.slice(0, 6)}...${address.slice(-4)}`
@@ -46,4 +41,5 @@ const shortenAddress = (address) => {
 const formatDate = (timestamp) => {
   return new Date(timestamp).toLocaleDateString()
 }
+
 </script>

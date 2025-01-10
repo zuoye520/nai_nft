@@ -63,7 +63,7 @@
 import { useWalletStore } from '../../stores/wallet'
 import { storeToRefs } from 'pinia'
 const walletStore = useWalletStore()
-const { account, currentChainConfig, primaryDomain,primaryDomainOmit, userUri } = storeToRefs(walletStore)
+const { account, currentChainConfig, } = storeToRefs(walletStore)
 import { ref,getCurrentInstance } from "vue";
 const { proxy } = getCurrentInstance();
 import { useRouter } from "vue-router";
@@ -94,19 +94,25 @@ const handleBlur = (field) => {
 const onSubmit = handleSubmit(async (values) => {
   try {
     //上传图片
-    // const result = await walletStore.uploadFile(values.image)
-    // console.log('uploadFile result:', result)
-    // const uri = `https://${proxy.$config.IPFS_CONFIG.gateway}/ipfs/${result.IpfsHash}`
-    const IpfsHash = "bafkreic37lk6gleexx3qbt42dgn2clyjgk7o6y32fndgaldqhsmu5ippqe"
-    const extendUri = ""
+    const resImg = await walletStore.uploadFile(values.image)
+    console.log('uploadFile result:', resImg)
+    // const uri = `https://${proxy.$config.IPFS_CONFIG.gateway}/ipfs/${resImg.IpfsHash}`
+    const uri = resImg.IpfsHash
+    const ipfsJson = { ...values };
+    ipfsJson.image = uri 
+    const resJson = await walletStore.uploadJson(ipfsJson)
+    console.log('uploadJson result:', resJson)
+    const extendUri = resJson.IpfsHash 
     console.log("Form submitted:", values);
+    // const uri = "bafkreihn327a2zr2emwdw2lj7bvwlld6kcd3jz6ybkyj6odnjpocswcdoa"
+    // const extendUri = "bafkreibdi2fbtsdw6rgl6ho7abts63na57kdf6e7mb2g4kgacjzxtkcl4a"
     const data = {
       from: account.value,
       value: 10,//部署费用
       contractAddress: currentChainConfig.value.contracts.mainAddress,
       methodName: "createToken",
       args: [
-        IpfsHash,//uri
+        uri,//uri
         extendUri,//扩展uri 存取扩展数据
         values.collectionName,//name
         values.collectionName,//symbol

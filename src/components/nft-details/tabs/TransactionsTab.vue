@@ -18,7 +18,7 @@
               <!-- Lucky Bonus Badge -->
               <div v-if="tx.luckyBonus" class="flex items-center space-x-1 text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">
                 <SparklesIcon class="w-4 h-4" />
-                <span>Win 1 NULS Lucky Bonus!</span>
+                <span>Win {{tx.luckyBonus}} NULS Lucky Bonus!</span>
               </div>
             </div>
           </div>
@@ -50,48 +50,53 @@ const props = defineProps({
   nft: {
     type: Object,
     required: true
+  },
+  transactions: {
+    type: Array,
+    required: true
   }
+  
 })
 
 // Mock transactions data - only Mint and Swap transactions
-const transactions = [
-  {
-    hash: '0x123...',
-    type: 'Mint',
-    from: '0xabc...',
-    amount: 100,
-    usdValue: 150,
-    timestamp: Date.now() - 3600000,
-    luckyBonus: true
-  },
-  {
-    hash: '0x456...',
-    type: 'Swap',
-    from: '0xdef...',
-    amount: 120,
-    usdValue: 180,
-    timestamp: Date.now() - 7200000,
-    luckyBonus: false
-  },
-  {
-    hash: '0x789...',
-    type: 'Mint',
-    from: '0xghi...',
-    amount: 50,
-    usdValue: 75,
-    timestamp: Date.now() - 10800000,
-    luckyBonus: true
-  },
-  {
-    hash: '0x101...',
-    type: 'Swap',
-    from: '0xjkl...',
-    amount: 80,
-    usdValue: 120,
-    timestamp: Date.now() - 14400000,
-    luckyBonus: true
-  }
-]
+// const transactions = [
+//   {
+//     hash: '0x123...',
+//     type: 'Mint',
+//     from: '0xabc...',
+//     amount: 100,
+//     usdValue: 150,
+//     timestamp: Date.now() - 3600000,
+//     luckyBonus: true
+//   },
+//   {
+//     hash: '0x456...',
+//     type: 'Swap',
+//     from: '0xdef...',
+//     amount: 120,
+//     usdValue: 180,
+//     timestamp: Date.now() - 7200000,
+//     luckyBonus: false
+//   },
+//   {
+//     hash: '0x789...',
+//     type: 'Mint',
+//     from: '0xghi...',
+//     amount: 50,
+//     usdValue: 75,
+//     timestamp: Date.now() - 10800000,
+//     luckyBonus: true
+//   },
+//   {
+//     hash: '0x101...',
+//     type: 'Swap',
+//     from: '0xjkl...',
+//     amount: 80,
+//     usdValue: 120,
+//     timestamp: Date.now() - 14400000,
+//     luckyBonus: true
+//   }
+// ]
 
 const getTypeStyles = (type) => {
   const styles = {

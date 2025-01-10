@@ -16,6 +16,12 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn.value = true
     return userInfo
   }
+  //用户信息
+  async function userInfo() {
+    const userInfo = await api.userInfo()
+    user.value = userInfo;
+    return userInfo
+  }
   //退出登录
   function logout() {
     user.value = null
@@ -27,6 +33,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn,
     loginNonce,
     login,
+    userInfo,
     logout
   }
 })

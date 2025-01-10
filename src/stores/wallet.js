@@ -62,15 +62,24 @@ export const useWalletStore = defineStore('wallet', () => {
       //开始签名
       const signData = await walletService.nabox.signMessage([nonce, account.value])
       console.log('signData:',signData)
+      console.log('login data:',{
+        "address": account.value,
+        "pubKey": accountPub.value,
+        "nonce": nonce,
+        "signData": signData,
+        "inviteCode": ""
+      })
+      const user = await authStore.login({
+        "address": account.value,
+        "pubKey": accountPub.value,
+        "nonce": nonce,
+        "signData": signData,
+        "inviteCode": ""
+      })
+      console.log('user:',user)
+      sessionStorage.setItem("userInfo", JSON.stringify(user));
 
-      // const user = await authStore.login({
-      //   "address": account.value,
-      //   "pubKey": accountPub.value,
-      //   "nonce": nonce,
-      //   "signData": signData,
-      //   "inviteCode": ""
-      // })
-      // console.log('nonce:',nonce)
+      // await authStore.userInfo()
 
     } catch (err) {
       error.value = err.message || 'Failed to connect to wallet'

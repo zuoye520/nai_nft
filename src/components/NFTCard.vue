@@ -27,7 +27,7 @@
 
         <!-- Market Value -->
         <div class="flex items-center justify-between">
-          <span class="text-gray-400">Market Value:</span>
+          <span class="text-gray-400">Market cap:</span>
           <span class="text-green-400 font-medium">{{ nft.marketValue }} NULS</span>
         </div>
 

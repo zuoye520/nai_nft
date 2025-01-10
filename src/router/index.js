@@ -17,7 +17,7 @@ const router = createRouter({
     { path: '/profile', component: Profile },
     { path: '/rewards', component: Rewards },
     { path: '/refer', component: Refer },
-    { path: '/chart', component: Refer }
+    { path: '/chart', component: Chart }
   ]
 })
 

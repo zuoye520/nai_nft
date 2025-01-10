@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as api from '../services/api'
-
+import {fromAmount,formatUsd} from '../utils/format'
+import { IPFS_GATEWAY } from '../config'
 export const useNftStore = defineStore('nft', () => {
   // NFT列表数据 Mock
   const nfts = ref([
@@ -70,7 +71,27 @@ export const useNftStore = defineStore('nft', () => {
       mintedSupply: 900
     }
   ])
-
+  const nftInfo = ref({
+    id:'',
+    name: '',
+    creator: '',
+    image: '',
+    price: 0,
+    mintPrice: 0,
+    totalSupply: 1000,
+    mintedSupply: 600,//id > 2 ? 1000 : 600
+    mintPercent: 0,
+    phase: 'mint', // 'mint' or 'swap'
+    description: '',
+    buyFee: 0,
+    sellFee: 0,
+    volume: 0,
+    social: {
+      twitter: '',
+      telegram: '',
+      website: ''
+    }
+  })
   // 持有的NFT Mock
   const heldNFTs = ref([
     {
@@ -90,7 +111,7 @@ export const useNftStore = defineStore('nft', () => {
       mintedSupply: 800
     }
   ])
-  //创建的NFT Mock
+  // 创建的NFT Mock
   const createdNFTs = ref([
     {
       id: 3,
@@ -101,11 +122,89 @@ export const useNftStore = defineStore('nft', () => {
       mintedSupply: 1000
     }
   ])
+  //持有NFT 前20名 Mock
+  const nftHolders = ref([{
+    address: `NULS${Math.random().toString(16).slice(2, 42)}`,
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${1}`,
+    balance: 0,
+    percentage: 0,
+    joinDate: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+  }])
+  //回复列表 Mock
+  const replies = ref([
+    {
+      id: 1,
+      author: 'User1',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=12',
+      content: 'Great NFT collection!',
+      timestamp: Date.now() - 3600000,
+      likes: 5
+    }
+  ])
+  //NFT txn Mock
+  const transactions =ref([
+    {
+      hash: '0x789...',
+      type: 'Mint',
+      from: '0xghi...',
+      amount: 50,
+      usdValue: 75,
+      timestamp: Date.now() - 10800000,
+      luckyBonus: 0
+    },
+    {
+      hash: '0x101...',
+      type: 'Swap',
+      from: '0xjkl...',
+      amount: 80,
+      usdValue: 120,
+      timestamp: Date.now() - 14400000,
+      luckyBonus: 1
+    }
+  ]) 
+  //NFT价格走势
+  const prices = ref([
+    { "time": 1672531200, "price": 1 },     // 2023-01-01 00:00:00
+    { "time": 1672531500, "price": 1.05 },  // 2023-01-01 00:05:00
+    { "time": 1672531800, "price": 1.10 },  // 2023-01-01 00:10:00
+    { "time": 1672532100, "price": 1.11 },  // 2023-01-01 00:15:00
+    { "time": 1672532400, "price": 1.13 },  // 2023-01-01 00:20:00
+    { "time": 1672532700, "price": 1.12 },  // 2023-01-01 00:25:00
+    { "time": 1672533000, "price": 1.16 },  // 2023-01-01 00:30:00
+    { "time": 1672617600, "price": 1.20 },  // 2023-01-02 00:00:00
+    { "time": 1672617900, "price": 1.21 },  // 2023-01-02 00:05:00
+    { "time": 1672618200, "price": 1.19 },  // 2023-01-02 00:10:00
+    { "time": 1672618500, "price": 1.18 },  // 2023-01-02 00:15:00
+    { "time": 1672618800, "price": 1.22 },  // 2023-01-02 00:20:00
+    { "time": 1672619100, "price": 1.21 }   // 2023-01-02 00:25:00
+])
 
-  //获取首页NFT列表
+  // 获取首页NFT列表
   async function getNFTs() {
     const result = await api.nftList();
-    nfts.value = result.list;
+    const list = result.list.map((item)=>{
+      item.name = item.collectionName
+      item.image = IPFS_GATEWAY + item.uri
+      item.totalSupply = item.maxSupply
+      item.mintedSupply = item.minted
+      item.marketValue = 0 //市值
+      return item
+    })
+    nfts.value = list;
+  }
+  // 获取NFT详情
+  async function getNFTInfo(id) {
+    const result = await api.nftInfo(id);
+    result.name = result.collectionName
+    result.image = IPFS_GATEWAY + result.uri
+    result.totalSupply = result.maxSupply
+    result.mintedSupply = result.minted
+    result.marketValue = 0 //市值
+    result.mintPrice = fromAmount(result.mintPrice)
+    result.mintPercent = result.mintPercent/100 
+    result.buyFee = result.buyFee/100 
+    result.sellFee = result.sellFee/100 
+    nftInfo.value = result;
   }
   //获取我持有的NFTs
   async function getHeldNFTs() {
@@ -117,13 +216,65 @@ export const useNftStore = defineStore('nft', () => {
     const result = await api.nftCreatedList();
     nfts.value = result.list;
   }
+  //获取top holders
+  async function getNftHolders(id) {
+    const result = await api.nftHolders(id);
+    nftHolders.value = result.list;
+  }
+  //获取回复列表
+  async function getNftReplyList(params) {
+    const result = await api.nftReplyList(params);
+    const list = result.list.map((item)=>{
+      item.author = item.userAddress
+      item.timestamp = item.createdDate
+      item.avatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=12'
+      return item
+    })
+    replies.value = list;
+  }
+  //回复
+  async function nftReply(params) {
+    const result = await api.nftReply(params);
+    return result;
+  }
+  
+  //获取txn
+  async function getNftTxn(params) {
+    const result = await api.nftTxn(params);
+    const list = result.list.map((item)=>{
+      item.txHash = item.txHash
+      item.type = item.txType
+      item.from = item.userAddress
+      item.luckyBonus = item.luckyBonus
+      item.usdValue = 0
+      return item
+    })
+    transactions.value = list;
+  }
+  //获取价走势
+  async function getNftPrice(id) {
+    const result = await api.nftHolders(id);
+    prices.value = result;
+  }
 
   return {
     nfts,
+    nftInfo,
+    nftHolders,
+    replies,
+    transactions,
+    prices,
     heldNFTs,
     createdNFTs,
     getNFTs,
+    getNFTInfo,
+    getNftHolders,
+    getNftReplyList,
+    nftReply,
+    getNftTxn,
+    getNftPrice,
     getHeldNFTs,
-    getCreatedNFTs
+    getCreatedNFTs,
+    
   }
 })
