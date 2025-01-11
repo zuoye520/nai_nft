@@ -10,12 +10,16 @@ import Chart from '../views/Chart.vue'
 
 const router = createRouter({
   history: createWebHistory(),
+  scrollBehavior(to, from, savedPosition) {
+    // 总是滚动到顶部
+    return { top: 0 };
+  },
   routes: [
     { path: '/', component: Home },
     { path: '/create', component: Create },
     { path: '/nft/:id', component: NFTDetails },
-    { path: '/profile', component: Profile },
-    { path: '/rewards', component: Rewards },
+    { path: '/profile/:address', component: Profile },
+    { path: '/rewards/:address', component: Rewards },
     { path: '/refer', component: Refer },
     { path: '/chart', component: Chart }
   ]

@@ -9,17 +9,17 @@
             class="w-16 h-16 rounded-full"
           />
           <div>
-            <h1 class="text-2xl font-bold text-white">{{ store.shortAddress }}</h1>
+            <h1 class="text-2xl font-bold text-white">{{ $format.shortenAddress(address) }}</h1>
             <div class="flex items-center space-x-2 mt-1">
               <button 
-                @click="store.copyAddress"
+                @click="store.copyAddress(address)"
                 class="text-sm text-gray-400 hover:text-green-400 flex items-center space-x-1"
               >
                 <DocumentDuplicateIcon class="w-4 h-4" />
                 <span>Copy Address</span>
               </button>
               <button 
-                @click="store.openExplorer"
+                @click="store.openExplorer(address)"
                 class="text-sm text-gray-400 hover:text-green-400 flex items-center space-x-1"
               >
                 <ArrowTopRightOnSquareIcon class="w-4 h-4" />
@@ -36,7 +36,7 @@
           <button 
             v-for="tab in tabs" 
             :key="tab.id"
-            @click="activeTab = tab.id"
+            @click="handleActiveTab(tab.id)"
             class="py-4 px-1 relative"
             :class="[
               activeTab === tab.id 
@@ -54,16 +54,24 @@
       </div>
 
       <!-- NFT Grid -->
-      <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div v-show="activeTab === 'held'" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <NFTCard 
-          v-for="nft in displayedNFTs" 
+          v-for="nft in heldNFTs" 
+          :key="nft.id" 
+          :nft="nft"
+          :tokenid="activeTab === 'held'"
+        />
+      </div>
+      <div v-show="activeTab === 'created'" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <NFTCard 
+          v-for="nft in createdNFTs" 
           :key="nft.id" 
           :nft="nft"
         />
       </div>
 
       <!-- Empty State -->
-      <div v-if="displayedNFTs.length === 0" class="text-center py-12">
+      <div v-if="heldNFTs.length === 0" class="text-center py-12">
         <div class="text-gray-400">No NFTs found</div>
         <router-link 
           v-if="activeTab === 'created'" 
@@ -80,6 +88,8 @@
 <script setup>
 import { ref, onMounted,onBeforeMount,computed,getCurrentInstance } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
+const route = useRoute()
 const { proxy } = getCurrentInstance();
 
 import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
@@ -89,25 +99,31 @@ const store = useWalletStore()
 import { useNftStore } from '../stores/nft'
 const nftStore = useNftStore()
 const { heldNFTs,createdNFTs } = storeToRefs(nftStore)
-
+const address = ref('')
 const activeTab = ref('held')
 const tabs = [
   { id: 'held', name: 'NFTs Held' },
   { id: 'created', name: 'NFTs Created' }
 ]
-const displayedNFTs = computed(() => {
-  return activeTab.value === 'held' ? heldNFTs.value : createdNFTs.value
-})
+
+const handleActiveTab = (id)=>{
+  activeTab.value = id
+}
 
 onBeforeMount(() => {
   console.log('Component will be mounted')
 })
 onMounted(() => {
-  // initData()
+  address.value = route.params.address
+  initData()
 })
 const initData = ()=>{
-  nftStore.getHeldNFTs()
-  nftStore.getCreatedNFTs()
+  nftStore.getHeldNFTs({
+    address:address.value
+  })
+  nftStore.getCreatedNFTs({
+    address:address.value
+  })
 }
 
 </script>

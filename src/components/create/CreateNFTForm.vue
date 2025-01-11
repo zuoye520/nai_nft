@@ -49,8 +49,11 @@
 
     <!-- Submit Button -->
     <div class="pt-6">
-      <BaseButton type="submit" primary class="w-full">
+      <BaseButton v-if ="account" type="submit" primary class="w-full">
         Create Collection
+      </BaseButton>
+      <BaseButton v-else primary class="w-full" @click="walletStore.connect">
+        Connect
       </BaseButton>
     </div>
 
@@ -60,11 +63,12 @@
 </template>
 
 <script setup>
+import { ref, onMounted,onBeforeMount,computed,getCurrentInstance } from 'vue'
 import { useWalletStore } from '../../stores/wallet'
 import { storeToRefs } from 'pinia'
 const walletStore = useWalletStore()
 const { account, currentChainConfig, } = storeToRefs(walletStore)
-import { ref,getCurrentInstance } from "vue";
+
 const { proxy } = getCurrentInstance();
 import { useRouter } from "vue-router";
 import { ChevronRightIcon } from "@heroicons/vue/24/outline";
@@ -83,7 +87,6 @@ const { handleSubmit, values, errors, validateField, setFieldValue } =
   useNFTValidation();
 
 const handleFieldUpdate = async (field, value) => {
-  
   setFieldValue(field, value);
 };
 
@@ -108,7 +111,7 @@ const onSubmit = handleSubmit(async (values) => {
     // const extendUri = "bafkreibdi2fbtsdw6rgl6ho7abts63na57kdf6e7mb2g4kgacjzxtkcl4a"
     const data = {
       from: account.value,
-      value: 10,//部署费用
+      value: currentChainConfig.value.createPayment,//部署费用
       contractAddress: currentChainConfig.value.contracts.mainAddress,
       methodName: "createToken",
       args: [
@@ -134,5 +137,10 @@ const onSubmit = handleSubmit(async (values) => {
   }
 });
 
-
+onMounted(() => {
+  // initData()
+})
+const initData = async ()=>{
+  
+}
 </script>

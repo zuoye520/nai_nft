@@ -5,7 +5,7 @@
       <div class="text-center mb-12">
         <h1 class="text-4xl font-bold text-white mb-6">Rewards</h1>
         <p class="text-xl text-gray-400">
-          Earn rewards by minting NFTs and winning lucky bonus
+          Win lucky prizes by Mint/Swap NFT
         </p>
       </div>
 
@@ -17,6 +17,7 @@
             <div class="text-3xl font-bold text-white">{{ rewards }} NULS</div>
           </div>
           <button 
+          v-if="store.account"
             class="px-6 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-colors"
             @click="handleWithdraw"
           >
@@ -33,7 +34,7 @@
             class="flex justify-between items-center py-4 border-b border-gray-800 last:border-0">
             <div>
               <div class="text-white">{{ reward.type }}</div>
-              <div class="text-sm text-gray-400">{{ reward.date }}</div>
+              <div class="text-sm text-gray-400">{{ $format.formatDate(reward.date) }}</div>
             </div>
             <div :class="[
               'font-medium',
@@ -51,6 +52,8 @@
 <script setup>
 import { ref, onMounted,onBeforeMount,getCurrentInstance } from 'vue'
 import { storeToRefs } from 'pinia'
+import { useRoute } from 'vue-router'
+const route = useRoute()
 const { proxy } = getCurrentInstance();
 import { useWalletStore } from '../stores/wallet'
 const store = useWalletStore()
@@ -59,14 +62,19 @@ import { useRewardsStore } from '../stores/rewards'
 const rewardsStore = useRewardsStore()
 const { rewards,rewardHistory } = storeToRefs(rewardsStore)
 
+const address = ref('')
 onBeforeMount(() => {
   console.log('Component will be mounted')
 })
 onMounted(() => {
-  // initData()
+  address.value = route.params.address
+  initData()
 })
 const initData = ()=>{
-  rewardHistory.getHistoryRewards()
+  rewardsStore.getRewards(address.value)
+  rewardsStore.getHistoryRewards({
+    address:address.value
+  })
 }
 
 const handleWithdraw = async () => {

@@ -14,7 +14,7 @@
       <div class="mt-6">
         <div class="flex items-center space-x-2">
           <span class="text-gray-400">Created by</span>
-          <span class="text-white font-medium">{{ nft.creator }}</span>
+          <router-link :to="`/profile/${nft.creator}`" class="text-white font-medium">{{ $format.shortenAddress(nft.creator) }}</router-link>
         </div>
       </div>
 
@@ -79,12 +79,21 @@
           </div>
 
           <BaseButton 
+          v-if="account"
             primary 
             class="w-full"
             @click="handleMint"
             :disabled="!canMint"
           >
             Mint Now
+          </BaseButton>
+          <BaseButton 
+          v-else
+            primary 
+            class="w-full"
+            @click="walletStore.connect"
+          >
+            Connect
           </BaseButton>
 
           <p class="text-sm text-gray-400 text-center">
@@ -100,7 +109,7 @@
               <button 
                 v-for="type in ['buy', 'sell']" 
                 :key="type"
-                @click="tradeType = type"
+                @click="tradeType = type;amount = ''"
                 class="flex-1 py-3 rounded-lg text-center font-medium transition-all"
                 :class="[
                   tradeType === type 
@@ -129,7 +138,7 @@
                   <button 
                     v-for="preset in [1, 5, 10, 20]" 
                     :key="preset"
-                    @click="amount = preset"
+                    @click="checkPrice(preset)" 
                     class="px-2 py-1 text-sm rounded bg-gray-800 text-gray-400 hover:text-green-400 transition-colors"
                   >
                     {{ preset }}
@@ -140,23 +149,24 @@
 
             <!-- Price Summary -->
             <div class="space-y-3 border-t border-gray-800 pt-4">
-              <div class="flex justify-between text-sm">
+              <!-- <div class="flex justify-between text-sm">
                 <span class="text-gray-400">Price per NFT</span>
                 <span class="text-white">{{ nft.price }} NULS</span>
-              </div>
+              </div> -->
               <div class="flex justify-between text-sm">
                 <span class="text-gray-400">
-                  {{ tradeType === 'buy' ? 'Buy' : 'Sell' }} Fee ({{ getFeePercentage }}%)
+                  {{ tradeType === 'buy' ? 'Buy' : 'Sell' }} Fee 
                 </span>
-                <span class="text-white">{{ calculateFee }} NULS</span>
+                <span class="text-white">{{ getFeePercentage }}%</span>
               </div>
               <div class="flex justify-between text-sm font-medium">
-                <span class="text-gray-400">Total</span>
+                <span class="text-gray-400">{{ tradeType === 'buy' ? 'Cost' : 'Get' }}</span>
                 <span class="text-green-400">{{ totalSwapAmount }} NULS</span>
               </div>
             </div>
 
             <BaseButton 
+              v-if="account"
               primary 
               class="w-full"
               @click="handleSwap"
@@ -164,6 +174,14 @@
             >
               {{ tradeType === 'buy' ? 'Buy' : 'Sell' }} Now
             </BaseButton>
+            <BaseButton 
+              v-else
+                primary 
+                class="w-full"
+                @click="walletStore.connect"
+              >
+                Connect
+              </BaseButton>
           </div>
         </template>
       </div>
@@ -172,12 +190,14 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useWalletStore } from '../../stores/wallet'
+import { ref, computed,getCurrentInstance} from 'vue'
 import { storeToRefs } from 'pinia'
+import { useWalletStore } from '../../stores/wallet'
 const walletStore = useWalletStore()
+import { useNftStore } from '../../stores/nft'
+const nftStore = useNftStore()
 const { account, currentChainConfig} = storeToRefs(walletStore)
-
+const { proxy } = getCurrentInstance()
 import BaseButton from '../BaseButton.vue'
 
 const props = defineProps({
@@ -189,10 +209,12 @@ const props = defineProps({
 
 const amount = ref('')
 const tradeType = ref('buy')
+const swapPrice = ref(0)
+const totalSwapAmount = ref(0)
 
 // Computed Properties
 const mintProgress = computed(() => {
-  return ((props.nft.mintedSupply / props.nft.totalSupply) * 100).toFixed(2)
+  return ((props.nft.mintedSupply / (props.nft.totalSupply * props.nft.mintPercent / 100)) * 100).toFixed(1)
 })
 
 const isMintPhase = computed(() => {
@@ -207,23 +229,23 @@ const getFeePercentage = computed(() => {
   return tradeType.value === 'buy' ? props.nft.buyFee : props.nft.sellFee
 })
 
-const calculateFee = computed(() => {
-  if (!amount.value) return 0
-  const baseAmount = Number(amount.value) * props.nft.price
-  return ((baseAmount * getFeePercentage.value) / 100).toFixed(2)
-})
+// const calculateFee = computed(() => {
+//   if (!amount.value) return 0
+//   const baseAmount = Number(amount.value) * props.nft.price
+//   return ((baseAmount * getFeePercentage.value) / 100).toFixed(2)
+// })
 
 const totalMintAmount = computed(() => {
   if (!amount.value) return 0
   return (Number(amount.value) * props.nft.mintPrice).toFixed(2)
 })
 
-const totalSwapAmount = computed(() => {
-  if (!amount.value) return 0
-  const baseAmount = Number(amount.value) * props.nft.price
-  const fee = Number(calculateFee.value)
-  return (baseAmount + fee).toFixed(2)
-})
+// const totalSwapAmount = computed(() => {
+//   if (!amount.value) return 0
+//   const baseAmount = Number(amount.value) * swapPrice.value
+//   // const fee = Number(calculateFee.value)
+//   return (baseAmount).toFixed(2)
+// })
 
 const canMint = computed(() => {
   if (!amount.value || Number(amount.value) <= 0) return false
@@ -260,27 +282,66 @@ const handleMint = async () => {
     console.error('Mint error:', error)
   }
 }
+const checkPrice = async (preset)=>{
+  amount.value = preset;
+  const methodName = tradeType.value == "buy" ? "getBuyCost" : "getSellAmount" 
+  const data = {
+      contractAddress: currentChainConfig.value.contracts.mainAddress,
+      methodName: methodName,
+      args: [
+        props.nft.pid,//pid    
+        amount.value,//数量
+      ]
+    }
+  const result = await walletStore.invokeView(data)
+  console.log('result:',result)
+  totalSwapAmount.value =  proxy.$format.fromAmount(result.result)
+}
 
 const handleSwap = async () => {
   try {
     console.log(`${tradeType.value}ing:`, {
       amount: amount.value,
       totalCost: totalSwapAmount.value,
-      fee: calculateFee.value
     })
-    // const data = {
-    //   from: account.value,
-    //   value: totalMintAmount.value,//mint费用
-    //   contractAddress: currentChainConfig.value.contracts.mainAddress,
-    //   methodName: "buyToken" ,//buyToken/sellToken
-    //   args: [
-    //     props.nft.pid,//pid    
-    //     amount.value,//mint数据
-    //   ]
-    // }
-    // console.log('swap data:',data)
-    // const result = await walletStore.contractCall(data)
-    // console.log('swap result:',result)
+    let data = {
+      from: account.value,
+      value: totalSwapAmount.value,//mint费用
+      contractAddress: currentChainConfig.value.contracts.mainAddress,
+      methodName: "buyToken" ,//buyToken/sellToken
+      args: [
+        props.nft.pid,//pid    
+        amount.value,//mint数据
+      ]
+    }
+    if(tradeType.value == 'sell'){
+      //获取持有的NFT
+      const heldList = await nftStore.getHeldNFTs({
+        address:account.value,
+        nftId:props.nft.id,
+        pageSize:amount.value
+      })
+      if(heldList.length < amount.value){
+        console.log('nft 余额不足')
+        return;
+      }
+      const nftIds = heldList.map((item)=>{
+        return item.tokenId;
+      })
+      console.log('nftIds:',nftIds)
+      data = {
+        from: account.value,
+        contractAddress: currentChainConfig.value.contracts.mainAddress,
+        methodName: "sellToken" ,//buyToken/sellToken
+        args: [
+          props.nft.pid,//pid    
+          nftIds,//nftIds
+        ]
+      }
+    }
+    console.log('swap data:',data)
+    const result = await walletStore.contractCall(data)
+    console.log('swap result:',result)
   } catch (error) {
     console.error('Swap error:', error)
   }

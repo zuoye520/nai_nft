@@ -9,8 +9,11 @@
         class="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent resize-none"
       ></textarea>
       <div class="mt-4 flex justify-end">
-        <BaseButton primary @click="handleSubmitReply">
+        <BaseButton v-if="walletStore.account" primary @click="handleSubmitReply">
           Post Reply
+        </BaseButton>
+        <BaseButton v-else primary @click="walletStore.connect">
+          Connect
         </BaseButton>
       </div>
     </div>
@@ -22,8 +25,8 @@
           <img :src="reply.avatar" :alt="reply.author" class="w-10 h-10 rounded-full">
           <div class="flex-1">
             <div class="flex items-center space-x-2">
-              <span class="text-white font-medium">{{ reply.author }}</span>
-              <span class="text-gray-400 text-sm">{{ formatDate(reply.timestamp) }}</span>
+              <router-link :to="`/profile/${reply.author}`" class="text-white font-medium">{{ $format.shortenAddress(reply.author) }}</router-link>
+              <span class="text-gray-400 text-sm">{{ $format.formatDate(reply.timestamp) }}</span>
             </div>
             <p class="mt-2 text-gray-300">{{ reply.content }}</p>
             <!-- <div class="mt-4 flex items-center space-x-4">
@@ -42,6 +45,8 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useWalletStore } from '../../../stores/wallet'
+const walletStore = useWalletStore()
 import { useNftStore } from '../../../stores/nft'
 const nftStore = useNftStore()
 import { HandThumbUpIcon } from '@heroicons/vue/24/outline'
@@ -89,7 +94,10 @@ const handleSubmitReply = async () => {
   await nftStore.getNftReplyList({id:props.nft.id})
   newReply.value = ''
 }
-const formatDate = (timestamp) => {
-  return new Date(timestamp).toLocaleString()
-}
+// const shortenAddress = (address) => {
+//   return `${address.slice(0, 6)}...${address.slice(-4)}`
+// }
+// const formatDate = (timestamp) => {
+//   return new Date(timestamp).toLocaleString()
+// }
 </script>

@@ -5,7 +5,7 @@ import { walletService } from '../services/wallet'
 import * as api from '../services/api'
 import {fromAmount,formatUsd} from '../utils/format'
 
-import { CHAINS ,NABOX_DOWNLOAD_URL} from '../config'
+import { CHAINS ,CURRENT_NETWORK, NABOX_DOWNLOAD_URL} from '../config'
 
 import { useAuthStore } from './auth';
 export const useWalletStore = defineStore('wallet', () => {
@@ -33,8 +33,9 @@ export const useWalletStore = defineStore('wallet', () => {
   })
   
   const currentChainConfig = computed(() => {
-    if (!chainInfo.value) return ''
-    return CHAINS[chainInfo.value.chainId*1];
+    return CURRENT_NETWORK;
+    // if (!chainInfo.value) return ''
+    // return CHAINS[chainInfo.value.chainId*1];
   })
 
   async function connect() {
@@ -44,6 +45,9 @@ export const useWalletStore = defineStore('wallet', () => {
       return;
     }
     try {
+      //切换到指定网络
+      await walletService.switchChain()
+
       isConnecting.value = true
       error.value = null
       account.value = await walletService.connect();
@@ -164,19 +168,18 @@ export const useWalletStore = defineStore('wallet', () => {
       throw new Error(error)
     }
   }
-  async function copyAddress (){
+  async function copyAddress (address){
     try {
-      copy(account.value)
+      console.log(address || account.value)
+      copy(address || account.value)
       console.log('copy ok')
       // Could add a toast notification here
     } catch (error) {
       console.error('Failed to copy address:', error)
     }
   }
-  function openExplorer() {
-    if (account.value) {
-      window.open(`${currentChainConfig.value.explorer}/address/info?address=${account.value}`, '_blank')
-    }
+  function openExplorer(address) {
+    window.open(`${currentChainConfig.value.explorer}/address/info?address=${address || account.value}`, '_blank')
   }
 
   async function uploadJson(data={}) {

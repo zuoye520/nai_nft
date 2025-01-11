@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as api from '../services/api'
 import { useWalletStore } from './wallet';
+import {fromAmount,formatUsd} from '../utils/format'
 export const useRewardsStore = defineStore('rewards', () => {
   const walletStore = useWalletStore();
   //可领取的奖励
@@ -24,10 +25,29 @@ export const useRewardsStore = defineStore('rewards', () => {
       amount: '-0.65688'
     }
   ])
-  //获取首页NFT列表
-  async function getHistoryRewards() {
-    const result = await api.historyRewards();
-    nfts.value = result.list;
+  //获取历史奖励记录
+  async function getHistoryRewards(params) {
+    const result = await api.historyRewards(params);
+    const list = result.list.map((item)=>{
+      item.type = item.txType
+      item.date = item.createdDate
+      item.amount = fromAmount(item.amount )
+      return item
+    })
+    rewardHistory.value = list;
+  }
+  //查询奖励
+  async function getRewards(userAddress) {
+    const data = {
+      contractAddress: walletStore.currentChainConfig.contracts.mainAddress,
+      methodName: "userDomains",
+      args: [userAddress || walletStore.account]
+    }
+    let result = await walletStore.invokeView(data)
+    console.log('userDomains result:',{data,result})
+    result = JSON.parse(result.result)
+    rewards.value = fromAmount(result.pending)
+    return 
   }
   //领取奖励
   async function receiveTiger() {
@@ -46,6 +66,7 @@ export const useRewardsStore = defineStore('rewards', () => {
   return {
     rewards,
     rewardHistory,
+    getRewards,
     getHistoryRewards,
     receiveTiger
   }

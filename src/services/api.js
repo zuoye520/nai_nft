@@ -107,9 +107,11 @@ export const userInfo = async ()=>{
  */
 export const nftHeldList = async (params= {})=>{
   const  data = {
-    "pageNum": 0,
-    "pageSize": 10,
+    address:params.address,
+    pageNum: params.pageNum || 1,
+    pageSize: params.pageSize || 10,
   }
+  if(params.nftId >= 0 ) data.nftId = params.nftId
   const url = `${API_URL}/user/nft/held`;
   const response = await sendRequest(url, { data, method: 'post' });
   console.log('nftHeldList result:',{data,response})
@@ -124,8 +126,9 @@ export const nftHeldList = async (params= {})=>{
  */
 export const nftCreatedList = async (params= {})=>{
   const  data = {
-    "pageNum": 0,
-    "pageSize": 10,
+    address:params.address,
+    pageNum: params.pageNum || 1,
+    pageSize: params.pageNum || 10,
   }
   const url = `${API_URL}/user/nft/created`;
   const response = await sendRequest(url, { data, method: 'post' });
@@ -140,9 +143,10 @@ export const nftCreatedList = async (params= {})=>{
  * @returns 
  */
 export const historyRewards = async (params= {})=>{
-  const  data = {
-    "pageNum": 0,
-    "pageSize": 10,
+  const data = {
+    address:params.address,
+    pageNum: params.pageNum || 1,
+    pageSize: params.pageNum || 10,
   }
   const url = `${API_URL}/user/reward`;
   const response = await sendRequest(url, { data, method: 'post' });
@@ -179,8 +183,8 @@ export const nftList = async (params= {})=>{
     pageNum: params.pageNum || 1,
     pageSize: params.pageSize || 10,
     keyword: params.keyword || "",
-    projectState: params.projectState || "Mint",
-    orderBy: params.orderBy || "ASC",
+    projectState: params.projectState,//Mint / Swap
+    orderBy: params.orderBy || "DESC", // ASC / DESC
   }
   const url = `${API_URL}/nft/list`;
   const response = await sendRequest(url, { data, method: 'post' });
@@ -229,8 +233,6 @@ export const nftTxn = async (params = {})=>{
 export const nftPrice = async (params={})=>{
   const  data = {
     id:params.id,
-    pageNum: params.pageNum || 1,
-    pageSize: params.pageSize || 10,
   }
   const url = `${API_URL}/nft/price`;
   const response = await sendRequest(url, { data, method: 'post' });

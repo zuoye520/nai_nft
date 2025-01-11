@@ -51,7 +51,7 @@ export function useNFTDetails(id) {
         sellFee: 2,
         volume: 1000,
         social: {
-          twitter: 'https://twitter.com/example',
+          twitter: 'https://x.com/example',
           telegram: 'https://t.me/example',
           website: 'https://example.com'
         }

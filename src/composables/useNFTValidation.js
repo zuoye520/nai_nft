@@ -14,23 +14,22 @@ export function useNFTValidation() {
     validateOnChange: true,  // 值变化时验证
     validateOnMount: false,   // 挂载时验证
     initialValues: {
-      collectionName: '',
-      nftCount: '',
+      collectionName: null,
+      nftCount: null,
       image: null,
-      mintPrice: '',
-      mintPercent: '',
-      swapFee:'',
-      buyFee: '',
-      sellFee: '',
-      description: '',
+      mintPrice: null,
+      mintPercent: null,
+      swapFee:null,
+      buyFee: null,
+      sellFee: null,
+      description: null,
       social: {
-        twitter: '',
-        telegram: '',
-        website: ''
+        twitter: null,
+        telegram: null,
+        website: null
       }
     }
   })
-
   return {
     handleSubmit,
     values,

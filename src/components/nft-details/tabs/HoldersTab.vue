@@ -9,8 +9,8 @@
           <div class="w-8 text-center text-gray-400">#{{ index + 1 }}</div>
           <img :src="holder.avatar" :alt="holder.address" class="w-8 h-8 rounded-full">
           <div>
-            <div class="text-white font-medium">{{ shortenAddress(holder.address) }}</div>
-            <div class="text-sm text-gray-400">Joined {{ formatDate(holder.joinDate) }}</div>
+            <div class="text-white font-medium"><router-link :to="`/profile/${holder.address}`">{{ $format.shortenAddress(holder.address) }}</router-link></div>
+            <div class="text-sm text-gray-400">Joined {{ $format.formatDate(holder.joinDate) }}</div>
           </div>
         </div>
         <div class="text-right">
@@ -34,12 +34,12 @@ defineProps({
   },
 })
 
-const shortenAddress = (address) => {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`
-}
+// const shortenAddress = (address) => {
+//   return `${address.slice(0, 6)}...${address.slice(-4)}`
+// }
 
-const formatDate = (timestamp) => {
-  return new Date(timestamp).toLocaleDateString()
-}
+// const formatDate = (timestamp) => {
+//   return new Date(timestamp).toLocaleDateString()
+// }
 
 </script>

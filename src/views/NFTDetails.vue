@@ -75,7 +75,7 @@ const handleActiveTab = (id)=>{
   }else if(id == 'transactions'){
     nftStore.getNftTxn({id:route.params.id})
   }else if(id == 'chart'){
-    // nftStore.getNftTxn({id:route.params.id})
+    nftStore.getNftPrice({id:route.params.id})
   }
 }
 onBeforeMount(() => {

@@ -5,7 +5,7 @@
       label="X (Twitter)"
       v-model="values.social.twitter"
       :error="errors['social.twitter']"
-      placeholder="https://twitter.com/username"
+      placeholder="https://x.com/username"
       @blur="$emit('blur', 'social.twitter')"
       @update:modelValue="updateField('social.twitter', $event)"
     />

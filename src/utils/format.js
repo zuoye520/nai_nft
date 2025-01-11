@@ -109,3 +109,19 @@ export const formatLargeNumber = (num) => {
   
   return n.toString()
 }
+/**
+ * 隐藏部分地址
+ * @param {*} address 
+ * @returns 
+ */
+export const shortenAddress = (address) => {
+  return `${address.slice(0, 6)}...${address.slice(-4)}`
+}
+/**
+ * 格式化时间 时间戳格式化为本地时间
+ * @param {*} timestamp 
+ * @returns 
+ */
+export const formatDate = (timestamp) => {
+  return new Date(timestamp).toLocaleString()
+}

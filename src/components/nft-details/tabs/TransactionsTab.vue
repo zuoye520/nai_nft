@@ -9,12 +9,12 @@
           </div>
           <div>
             <div class="flex items-center space-x-2">
-              <span class="text-white font-medium">{{ tx.type }}</span>
+              <span class="text-white font-medium">{{ tx.type =='CreateToken' ? 'Create': tx.type }}</span>
               <span class="text-gray-400">by</span>
-              <span class="text-blue-400">{{ shortenAddress(tx.from) }}</span>
+              <router-link :to="`/profile/${tx.from}`" class="text-blue-400">{{ $format.shortenAddress(tx.from) }}</router-link>
             </div>
             <div class="flex items-center space-x-2 text-sm">
-              <span class="text-gray-400">{{ formatDate(tx.timestamp) }}</span>
+              <span class="text-gray-400">{{ $format.formatDate(tx.timestamp) }}</span>
               <!-- Lucky Bonus Badge -->
               <div v-if="tx.luckyBonus" class="flex items-center space-x-1 text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full">
                 <SparklesIcon class="w-4 h-4" />
@@ -27,7 +27,8 @@
         <!-- Amount Info -->
         <div class="text-right">
           <div class="text-white font-medium">{{ tx.amount }} NULS</div>
-          <div class="text-sm text-gray-400">≈ ${{ tx.usdValue }}</div>
+          <!-- <div class="text-sm text-gray-400">≈ ${{ tx.usdValue }}</div> -->
+          <div v-show = "tx.nftCount" class="text-sm text-gray-400">{{ tx.nftCount }} NFT</div>
         </div>
       </div>
 
@@ -43,6 +44,7 @@
 import { 
   ArrowDownIcon,
   ArrowsRightLeftIcon,
+  ArrowsUpDownIcon,
   SparklesIcon
 } from '@heroicons/vue/24/outline'
 
@@ -100,6 +102,7 @@ const props = defineProps({
 
 const getTypeStyles = (type) => {
   const styles = {
+    'CreateToken': 'bg-red-500/20 text-red-400',
     'Mint': 'bg-green-500/20 text-green-400',
     'Swap': 'bg-blue-500/20 text-blue-400'
   }
@@ -108,17 +111,18 @@ const getTypeStyles = (type) => {
 
 const getTypeIcon = (type) => {
   const icons = {
+    'CreateToken':ArrowsUpDownIcon,
     'Mint': ArrowDownIcon,
     'Swap': ArrowsRightLeftIcon
   }
   return icons[type]
 }
 
-const shortenAddress = (address) => {
-  return `${address.slice(0, 6)}...${address.slice(-4)}`
-}
+// const shortenAddress = (address) => {
+//   return `${address.slice(0, 6)}...${address.slice(-4)}`
+// }
 
-const formatDate = (timestamp) => {
-  return new Date(timestamp).toLocaleString()
-}
+// const formatDate = (timestamp) => {
+//   return new Date(timestamp).toLocaleString()
+// }
 </script>

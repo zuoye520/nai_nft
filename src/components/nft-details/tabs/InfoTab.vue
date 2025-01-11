@@ -5,6 +5,7 @@
       <div class="space-y-4">
         <InfoRow label="Collection Name" :value="nft.name" />
         <InfoRow label="Total Supply" :value="nft.totalSupply" />
+        <InfoRow label="Market cap" :value="`${nft.marketValue} NULS`" />
         <InfoRow label="Mint Price" :value="`${nft.mintPrice} NULS`" />
         <InfoRow label="Mint Percent" :value="`${nft.mintPercent}%`" />
         <InfoRow label="Buy Fee" :value="`${nft.buyFee}%`" />

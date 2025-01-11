@@ -22,26 +22,30 @@
       <div class="space-y-3">
         <!-- Name -->
         <h3 class="text-lg font-semibold text-white group-hover:text-green-400 transition-colors duration-300">
-          {{ nft.name }}
-        </h3>
-
-        <!-- Market Value -->
-        <div class="flex items-center justify-between">
-          <span class="text-gray-400">Market cap:</span>
-          <span class="text-green-400 font-medium">{{ nft.marketValue }} NULS</span>
-        </div>
-
-        <!-- Progress Bar -->
-        <div class="space-y-2">
-          <div class="flex justify-between text-sm">
-            <span class="text-gray-400">Progress:</span>
-            <span class="text-green-400">{{ mintProgress }}%</span>
+          <div class="flex items-center justify-between">
+            <span>{{ nft.name }} </span>
+            <span v-show="tokenid" class="text-green-400 font-medium">#{{nft.tokenId}}</span>
           </div>
-          <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
-            <div 
-              class="h-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-300"
-              :style="{ width: `${mintProgress}%` }"
-            ></div>
+        </h3>
+        <div v-show="!tokenid">
+          <!-- Market Value -->
+          <div  class="flex items-center justify-between">
+            <span class="text-gray-400">Market cap:</span>
+            <span class="text-green-400 font-medium">{{ nft.marketValue }} NULS</span>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm">
+              <span class="text-gray-400">Progress:</span>
+              <span class="text-green-400">{{ mintProgress }}%</span>
+            </div>
+            <div class="w-full h-2 bg-gray-800 rounded-full overflow-hidden">
+              <div 
+                class="h-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-300"
+                :style="{ width: `${mintProgress}%` }"
+              ></div>
+            </div>
           </div>
         </div>
       </div>
@@ -62,12 +66,19 @@ const props = defineProps({
       image: '',
       marketValue: 0,
       totalSupply: 1000,
-      mintedSupply: 0
+      mintedSupply: 0,
+      tokenId:''
     })
+  },
+  tokenid:{
+    type: Boolean,
+    default: false
   }
 })
 
 const mintProgress = computed(() => {
-  return ((props.nft.mintedSupply / props.nft.totalSupply) * 100).toFixed(1)
+  // return ((props.nft.mintedSupply / props.nft.totalSupply) * 100).toFixed(1)
+  return ((props.nft.mintedSupply / (props.nft.totalSupply * props.nft.mintPercent / 100)) * 100).toFixed(1)
 })
+
 </script>

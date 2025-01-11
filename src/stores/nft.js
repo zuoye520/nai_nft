@@ -185,9 +185,10 @@ export const useNftStore = defineStore('nft', () => {
     const list = result.list.map((item)=>{
       item.name = item.collectionName
       item.image = IPFS_GATEWAY + item.uri
+      item.mintPercent = item.mintPercent/100 
       item.totalSupply = item.maxSupply
       item.mintedSupply = item.minted
-      item.marketValue = 0 //市值
+      item.marketValue = item.projectState =='Swap'? fromAmount(item.minted * item.currentPrice) : fromAmount(item.minted * item.mintPrice) //市值
       return item
     })
     nfts.value = list;
@@ -195,31 +196,61 @@ export const useNftStore = defineStore('nft', () => {
   // 获取NFT详情
   async function getNFTInfo(id) {
     const result = await api.nftInfo(id);
+    result.creator = result.ownerAddress
     result.name = result.collectionName
     result.image = IPFS_GATEWAY + result.uri
     result.totalSupply = result.maxSupply
     result.mintedSupply = result.minted
-    result.marketValue = 0 //市值
+    result.marketValue = result.projectState =='Swap' && result.currentPrice ? fromAmount(result.minted * result.currentPrice) : fromAmount(result.minted * result.mintPrice) //市值
     result.mintPrice = fromAmount(result.mintPrice)
     result.mintPercent = result.mintPercent/100 
     result.buyFee = result.buyFee/100 
     result.sellFee = result.sellFee/100 
+    result.description = result.metadata.description
+    result.social = result.metadata.social
     nftInfo.value = result;
   }
   //获取我持有的NFTs
-  async function getHeldNFTs() {
-    const result = await api.nftHeldList();
-    nfts.value = result.list;
+  async function getHeldNFTs(params) {
+    const result = await api.nftHeldList(params);
+    const list = result.list.map((item)=>{
+      item.name = item.collectionName
+      item.image = IPFS_GATEWAY + item.uri
+      item.mintPercent = item.mintPercent/100 
+      item.totalSupply = item.maxSupply
+      item.mintedSupply = item.minted
+      item.marketValue = item.projectState =='Swap'? fromAmount(item.minted * item.currentPrice) : fromAmount(item.minted * item.mintPrice) //市值
+      return item
+    })
+    heldNFTs.value = list;
+    return list;
   }
   //获取我创建的NFTs
-  async function getCreatedNFTs() {
-    const result = await api.nftCreatedList();
-    nfts.value = result.list;
+  async function getCreatedNFTs(params) {
+    const result = await api.nftCreatedList(params);
+    const list = result.list.map((item)=>{
+      item.name = item.collectionName
+      item.image = IPFS_GATEWAY + item.uri
+      item.mintPercent = item.mintPercent/100 
+      item.totalSupply = item.maxSupply
+      item.mintedSupply = item.minted
+      item.marketValue = item.projectState =='Swap'? fromAmount(item.minted * item.currentPrice) : fromAmount(item.minted * item.mintPrice) //市值
+      return item
+    })
+    createdNFTs.value = list;
   }
   //获取top holders
   async function getNftHolders(id) {
     const result = await api.nftHolders(id);
-    nftHolders.value = result.list;
+    const list = result.map((item)=>{
+      item.address = item.userAddress
+      item.balance = item.nftHoldings
+      item.percentage = item.nftHoldingRatio
+      item.joinDate = item.createdDate
+      item.avatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=12'
+      return item
+    })
+    nftHolders.value = list;
   }
   //获取回复列表
   async function getNftReplyList(params) {
@@ -245,15 +276,17 @@ export const useNftStore = defineStore('nft', () => {
       item.txHash = item.txHash
       item.type = item.txType
       item.from = item.userAddress
-      item.luckyBonus = item.luckyBonus
+      item.amount = fromAmount(item.amount)
+      item.luckyBonus = item.luckyBonus && fromAmount(item.luckyBonus)
       item.usdValue = 0
+      item.timestamp = item.createdDate
       return item
     })
     transactions.value = list;
   }
   //获取价走势
   async function getNftPrice(id) {
-    const result = await api.nftHolders(id);
+    const result = await api.nftPrice(id);
     prices.value = result;
   }
 

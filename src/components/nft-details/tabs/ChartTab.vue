@@ -22,8 +22,8 @@
       </div>
     </div>
     
-    <div class="h-96 flex justify-center text-gray-400">
-      <div ref="chartRef"  style="width: 100%; height: 500px;"></div>
+    <div class="flex justify-center text-gray-400">
+      <div ref="chartRef"  style="width: 100%; height: 400px;"></div>
     </div>
   </div>
 </template>
@@ -55,7 +55,7 @@ onMounted(async () => {
   if (chartRef.value) {
     chart = createChart(chartRef.value, {
       width: chartRef.value.offsetWidth,
-      height: 500,
+      height: 400,
       layout: {
         background: { type: 'solid', color: '#000000' }, // 深色背景
         textColor: '#d1d4dc', // 文本颜色
