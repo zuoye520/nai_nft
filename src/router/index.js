@@ -6,6 +6,7 @@ import NFTDetails from '../views/NFTDetails.vue'
 import Profile from '../views/Profile.vue'
 import Rewards from '../views/Rewards.vue'
 import Refer from '../views/Refer.vue'
+import HowItWorks from '../views/HowItWorks.vue'
 import Chart from '../views/Chart.vue'
 
 const router = createRouter({
@@ -21,6 +22,7 @@ const router = createRouter({
     { path: '/profile/:address', component: Profile },
     { path: '/rewards/:address', component: Rewards },
     { path: '/refer/:address', component: Refer },
+    { path: '/how-it-works', component: HowItWorks },
     { path: '/chart', component: Chart }
   ]
 })

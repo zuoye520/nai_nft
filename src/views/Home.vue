@@ -20,7 +20,8 @@
           <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 animate-fade-in animation-delay-600">
             <CreateNFTButton />
             <BaseButton class="text-lg px-8 py-3">
-              How it works?
+              
+              <router-link to="/how-it-works">How it works?</router-link>
             </BaseButton>
           </div>
         </div>

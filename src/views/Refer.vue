@@ -7,6 +7,9 @@
         <p class="text-xl text-gray-400">
           Earn rewards when your friends mint or trade NFTs
         </p>
+        <p class="text-xl text-gray-400">
+          Inviters will share <span class="text-red-400">50%</span> of the platform revenue as a reward
+        </p>
       </div>
 
       <!-- Referral Link Card -->
