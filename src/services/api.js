@@ -231,9 +231,9 @@ export const nftTxn = async (params = {})=>{
  * @param {*} id 
  * @returns 
  */
-export const nftPrice = async (params={})=>{
+export const nftPrice = async (id)=>{
   const  data = {
-    id:params.id,
+    id:id,
   }
   const url = `${API_URL}/nft/price`;
   const response = await sendRequest(url, { data, method: 'post' });

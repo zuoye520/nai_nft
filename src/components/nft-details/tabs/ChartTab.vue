@@ -23,14 +23,15 @@
     </div>
     
     <div class="flex justify-center text-gray-400">
-      <div ref="chartRef"  style="width: 100%; height: 400px;"></div>
+      <div ref="chartRef" style="width: 100%; height: 400px;"></div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { createChart } from 'lightweight-charts';
-import { ref, onMounted, nextTick, onBeforeUnmount,computed } from 'vue';
+import { ref, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
+
 const props = defineProps({
   nft: {
     type: Object,
@@ -44,151 +45,161 @@ const props = defineProps({
 
 const periods = ['5min', '1h', '1d']
 const selectedPeriod = ref('5min')
+const chartRef = ref(null)
+let chart = null
+let candlestickSeries = null
 
+// 格式化时间
+const formatTime = (timestamp) => {
+  const date = new Date(timestamp * 1000)
+  return date.toLocaleString()
+}
 
-const chartRef = ref(null); // 绑定 DOM 元素
-const isChartVisible = ref(true); // 控制容器显示
-let chart = null; // 保存图表实例
+// 格式化价格
+const formatPrice = (price) => {
+  return Number(price).toFixed(8)
+}
 
 onMounted(async () => {
-  await nextTick(); // 确保 DOM 完全渲染
+  await nextTick()
   if (chartRef.value) {
+    // 创建图表
     chart = createChart(chartRef.value, {
       width: chartRef.value.offsetWidth,
       height: 400,
       layout: {
-        background: { type: 'solid', color: '#000000' }, // 深色背景
-        textColor: '#d1d4dc', // 文本颜色
+        background: { type: 'solid', color: '#000000' },
+        textColor: '#d1d4dc',
       },
       grid: {
-        vertLines: {
-          color: '#2c2f36', // 垂直网格线颜色
-        },
-        horzLines: {
-          color: '#2c2f36', // 水平网格线颜色
-        },
+        vertLines: { color: '#2c2f36' },
+        horzLines: { color: '#2c2f36' },
       },
       crosshair: {
-        mode: 0, // 设置光标交互样式
+        mode: 1, // 十字线模式
+        vertLine: {
+          width: 1,
+          color: '#2c2f36',
+          style: 0,
+          labelBackgroundColor: '#2c2f36',
+        },
+        horzLine: {
+          width: 1,
+          color: '#2c2f36',
+          style: 0,
+          labelBackgroundColor: '#2c2f36',
+        }
       },
-    });
-    const candlestickSeries = chart.addCandlestickSeries({
-      upColor: '#4caf50', // 阳线颜色
-      downColor: '#f44336', // 阴线颜色
+      // 添加工具提示
+      localization: {
+        timeFormatter: (time) => formatTime(time),
+        priceFormatter: (price) => formatPrice(price),
+      },
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+      },
+    })
+
+    // 创建K线图系列
+    candlestickSeries = chart.addCandlestickSeries({
+      upColor: '#4caf50',
+      downColor: '#f44336',
       borderUpColor: '#4caf50',
       borderDownColor: '#f44336',
       wickUpColor: '#4caf50',
       wickDownColor: '#f44336',
-    });
-    // 生成 30 天的 K 线数据，从 2023-01-01 开始
-    const klineData = generateCandlestickData('2023-01-01', 30);
-    // const klineData = aggregateData(props.prices,'5min')
-    // console.log('klineData:',klineData)
-    candlestickSeries.setData(klineData);
-  } else {
-    console.error('chartRef is null!'); // 如果 chartRef 仍为 null
+    })
+
+    // 添加工具提示
+    chart.subscribeCrosshairMove((param) => {
+      if (param.time) {
+        const data = param.seriesData.get(candlestickSeries)
+        if (data) {
+          const tooltip = `
+            Time: ${formatTime(param.time)}
+            Open: ${formatPrice(data.open)}
+            High: ${formatPrice(data.high)}
+            Low: ${formatPrice(data.low)}
+            Close: ${formatPrice(data.close)}
+          `
+          // 可以在这里更新自定义的工具提示UI
+          console.log(tooltip)
+        }
+      }
+    })
+
+    // 初始化数据
+    updateChartData()
   }
-});
+})
+
+// 更新图表数据
+const updateChartData = () => {
+  if (candlestickSeries) {
+    const aggregatedData = aggregateData(props.prices, selectedPeriod.value)
+    candlestickSeries.setData(aggregatedData)
+  }
+}
+
+// 监听周期变化
+watch(selectedPeriod, () => {
+  updateChartData()
+})
+
+// 监听价格数据变化
+watch(() => props.prices, () => {
+  updateChartData()
+}, { deep: true })
 
 onBeforeUnmount(() => {
   if (chart) {
-    chart.remove(); // 销毁图表实例
+    chart.remove()
   }
-});
+})
 
-function generateCandlestickData(startDate, days) {
-  const data = [];
-  let lastClose = 1.0; // 初始收盘价
-  const date = new Date(startDate);
+// 聚合数据函数
+const aggregateData = (rawData, period) => {
+  if (!rawData || rawData.length === 0) return []
+  
+  const intervals = new Map()
+  
+  rawData.forEach(item => {
+    const key = getIntervalKey(item.time, period)
+    if (!intervals.has(key)) {
+      intervals.set(key, {
+        prices: [Number(item.price)],
+        time: Number(item.time)
+      })
+    } else {
+      intervals.get(key).prices.push(Number(item.price))
+    }
+  })
+  
+  return Array.from(intervals.values()).map(interval => {
+    const prices = interval.prices
+    return {
+      time: interval.time,
+      open: Number(prices[0]),
+      high: Number(Math.max(...prices)),
+      low: Number(Math.min(...prices)),
+      close: Number(prices[prices.length - 1])
+    }
+  })
+}
 
-  for (let i = 0; i < days; i++) {
-    const open = lastClose;
-    const high = +(open + Math.random() * 0.2).toFixed(2); // 随机高价
-    const low = +(open - Math.random() * 0.2).toFixed(2);  // 随机低价
-    const close = +(low + Math.random() * (high - low)).toFixed(2); // 随机收盘价
-
-    data.push({
-      time: date.toISOString().split('T')[0], // 转换为 YYYY-MM-DD 格式
-      open,
-      high,
-      low,
-      close,
-    });
-
-    // 更新日期和最后的收盘价
-    lastClose = close;
-    date.setDate(date.getDate() + 1);
+// 获取时间间隔键值
+const getIntervalKey = (timestamp, period) => {
+  const date = new Date(timestamp * 1000)
+  switch (period) {
+    case '5min':
+      return Math.floor(timestamp / 300) * 300
+    case '1h':
+      return Math.floor(timestamp / 3600) * 3600
+    case '1d':
+      return Math.floor(timestamp / 86400) * 86400
+    default:
+      return timestamp
   }
-
-  return data;
 }
-
-// 函数：将Unix时间戳转换为格式化日期（年-月-日T时:分:秒）
-function convertTimestampToDate(timestamp, interval) {
-    const date = new Date(timestamp * 1000);  // 转换为毫秒
-    let key;
-    if (interval === '5min') {
-        key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${String(date.getHours()).padStart(2, '0')}:${Math.floor(date.getMinutes() / 5) * 5}:00`;
-    } else if (interval === '1h') {
-        key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}T${String(date.getHours()).padStart(2, '0')}:00:00`;
-    } else if (interval === '1d') {
-        key = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
-    }
-    return key;
-}
-
-// 函数：重新组装数据
-function aggregateData(rawData, interval) {
-    let result = [];
-    let currentInterval = '';
-    let intervalData = [];
-
-    for (let i = 0; i < rawData.length; i++) {
-        const item = rawData[i];
-        const intervalKey = convertTimestampToDate(item.time, interval);
-
-        if (intervalKey !== currentInterval) {
-            if (intervalData.length > 0) {
-                // 处理当前时间段数据
-                const open = intervalData[0].price;
-                const high = Math.max(...intervalData.map(d => d.price));
-                const low = Math.min(...intervalData.map(d => d.price));
-                const close = intervalData[intervalData.length - 1].price;
-
-                result.push({
-                    time: item.time,
-                    open: open,
-                    high: high,
-                    low: low,
-                    close: close,
-                });
-            }
-
-            // 开始新的时间段
-            currentInterval = intervalKey;
-            intervalData = [item];
-        } else {
-            intervalData.push(item);
-        }
-    }
-
-    // 处理最后一个时间段
-    if (intervalData.length > 0) {
-        const open = intervalData[0].price;
-        const high = Math.max(...intervalData.map(d => d.price));
-        const low = Math.min(...intervalData.map(d => d.price));
-        const close = intervalData[intervalData.length - 1].price;
-
-        result.push({
-            time: currentInterval,
-            open: open,
-            high: high,
-            low: low,
-            close: close,
-        });
-    }
-
-    return result;
-}
-
 </script>

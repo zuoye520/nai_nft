@@ -168,19 +168,26 @@ export const useNftStore = defineStore('nft', () => {
   ]) 
   //NFT价格走势
   const prices = ref([
-    { "time": 1672531200, "price": 1 },     // 2023-01-01 00:00:00
-    { "time": 1672531500, "price": 1.05 },  // 2023-01-01 00:05:00
-    { "time": 1672531800, "price": 1.10 },  // 2023-01-01 00:10:00
-    { "time": 1672532100, "price": 1.11 },  // 2023-01-01 00:15:00
-    { "time": 1672532400, "price": 1.13 },  // 2023-01-01 00:20:00
-    { "time": 1672532700, "price": 1.12 },  // 2023-01-01 00:25:00
-    { "time": 1672533000, "price": 1.16 },  // 2023-01-01 00:30:00
-    { "time": 1672617600, "price": 1.20 },  // 2023-01-02 00:00:00
-    { "time": 1672617900, "price": 1.21 },  // 2023-01-02 00:05:00
-    { "time": 1672618200, "price": 1.19 },  // 2023-01-02 00:10:00
-    { "time": 1672618500, "price": 1.18 },  // 2023-01-02 00:15:00
-    { "time": 1672618800, "price": 1.22 },  // 2023-01-02 00:20:00
-    { "time": 1672619100, "price": 1.21 }   // 2023-01-02 00:25:00
+    {
+        "time": 1736596801737,
+        "price": "1"
+    },
+    {
+        "time": 1736604360505,
+        "price": "1.05"
+    },
+    {
+        "time": 1736604382604,
+        "price": "1.10"
+    },
+    {
+        "time": 1736738636245,
+        "price": "1.3"
+    },
+    {
+        "time": 1736768943976,
+        "price": "2"
+    },
 ])
 
   // 获取首页NFT列表
@@ -294,7 +301,11 @@ export const useNftStore = defineStore('nft', () => {
   }
   //获取价走势
   async function getNftPrice(id) {
-    const result = await api.nftPrice(id);
+    let result = await api.nftPrice(id);
+    result = result.map((item)=>{
+      item.price = fromAmount(item.price)
+      return item
+    })
     prices.value = result;
   }
 

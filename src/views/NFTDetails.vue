@@ -21,7 +21,7 @@
       <!-- Tab Content -->
       <div class="mt-8">
         <InfoTab v-if="activeTab === 'info'" :nft="nft" />
-        <ChartTab v-else-if="activeTab === 'chart'" :nft="nft" :prices="prices"/>
+        <ChartTab v-else-if="activeTab === 'chart'" :nft="nft" :prices="prices" />
         <TradeTab 
           v-else-if="activeTab === 'trade'" 
           :nft="nft"
@@ -78,7 +78,7 @@ const handleActiveTab = async (id)=>{
   }else if(id == 'transactions'){
     await nftStore.getNftTxn({id:route.params.id})
   }else if(id == 'chart'){
-    await nftStore.getNftPrice({id:route.params.id})
+    // await nftStore.getNftPrice(route.params.id)
   }
   isLoading.value = false
 }
