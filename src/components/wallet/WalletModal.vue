@@ -18,7 +18,7 @@
             <div>
               <div class="text-white font-medium">{{ store.shortAddress}}</div>
               <button 
-                @click="store.copyAddress()"
+                @click="store.copyAddress();"
                 class="text-sm text-gray-400 hover:text-green-400 flex items-center space-x-1"
               >
                 <DocumentDuplicateIcon class="w-4 h-4" />
@@ -49,7 +49,7 @@
           </router-link>
 
           <router-link 
-            to="/refer"
+            :to="`/refer/${store.account}`"
             class="flex items-center space-x-3 px-3 py-2 rounded-lg hover:bg-gray-800/50 text-white transition-colors"
             @click="store.toggleWalletModal"
           >

@@ -1,15 +1,15 @@
 import { defineStore } from 'pinia'
-import { ref, computed, getCurrentInstance } from 'vue'
+import { ref,computed } from 'vue'
 import copy from 'copy-to-clipboard';
 import { walletService } from '../services/wallet'
 import * as api from '../services/api'
 import {fromAmount,formatUsd} from '../utils/format'
-
 import { CHAINS ,CURRENT_NETWORK, NABOX_DOWNLOAD_URL} from '../config'
-
 import { useAuthStore } from './auth';
+import { useGlobalToast } from '../plugins/toast'
 export const useWalletStore = defineStore('wallet', () => {
   const authStore = useAuthStore();
+  const toast = useGlobalToast()
 
   const intervalId = ref(null)
   const account = ref(null)
@@ -50,44 +50,49 @@ export const useWalletStore = defineStore('wallet', () => {
 
       isConnecting.value = true
       error.value = null
-      account.value = await walletService.connect();
-      console.log('account address:',account.value)
-      accountPub.value = await walletService.getPub(account.value);
+       
+      const accountAddress = await walletService.connect();
+
+      console.log('account address:',accountAddress)
+      accountPub.value = await walletService.getPub(accountAddress);
       console.log('account Pub:',accountPub.value)
       chainInfo.value = await walletService.getChainInfo()
       console.log('getChainInfo:',chainInfo.value)
+      
       // 设置监听器
       setupEventListeners()
       // 检查网络状态
       await checkNetwork()
       //获取nonce值
-      const nonce = await authStore.loginNonce(account.value)
+      const nonce = await authStore.loginNonce(accountAddress)
       console.log('nonce:',nonce)
       //开始签名
-      const signData = await walletService.nabox.signMessage([nonce, account.value])
+      const signData = await walletService.nabox.signMessage([nonce, accountAddress])
       console.log('signData:',signData)
       console.log('login data:',{
-        "address": account.value,
+        "address": accountAddress,
         "pubKey": accountPub.value,
         "nonce": nonce,
         "signData": signData,
         "inviteCode": ""
       })
       const user = await authStore.login({
-        "address": account.value,
+        "address": accountAddress,
         "pubKey": accountPub.value,
         "nonce": nonce,
         "signData": signData,
-        "inviteCode": ""
+        "inviteCode": localStorage.getItem('inviteCode') || ''
       })
       console.log('user:',user)
       sessionStorage.setItem("userInfo", JSON.stringify(user));
-
+      account.value = accountAddress
       // await authStore.userInfo()
-
+      //获取账户余额
+      getBalance()
     } catch (err) {
       error.value = err.message || 'Failed to connect to wallet'
       console.error('Failed to connect to wallet:', err)
+      toast.show('Failed to connect to wallet', 'error')
       account.value = null
       chainInfo.value = null
     } finally {
@@ -95,11 +100,11 @@ export const useWalletStore = defineStore('wallet', () => {
     }
   }
 
-  // async function getBalance(){
-  //   const balance = await walletService.getNulsBalance();
-  //   nulsBalance.value = balance
-  //   return balance
-  // }
+  async function getBalance(){
+    const balance = await walletService.getNulsBalance();
+    nulsBalance.value = balance
+    return balance
+  }
   // async function getNulsUsdPrice(){
   //   const nulsUsd = await api.nulsUsd();
   //   nulsUsdPrice.value = nulsUsd
@@ -161,10 +166,11 @@ export const useWalletStore = defineStore('wallet', () => {
   async function contractCall(data){
     try {
      const result = await walletService.nabox.contractCall(data)
-     console.log('contractCall result:',error)
+     console.log('contractCall result:',result)
      return result;
     } catch (error) {
       console.error('contractCall error:',error)
+      // toast.show(error.message, 'error')
       throw new Error(error)
     }
   }
@@ -173,6 +179,7 @@ export const useWalletStore = defineStore('wallet', () => {
       console.log(address || account.value)
       copy(address || account.value)
       console.log('copy ok')
+      toast.show('Address copied to clipboard', 'success')
       // Could add a toast notification here
     } catch (error) {
       console.error('Failed to copy address:', error)
@@ -180,6 +187,9 @@ export const useWalletStore = defineStore('wallet', () => {
   }
   function openExplorer(address) {
     window.open(`${currentChainConfig.value.explorer}/address/info?address=${address || account.value}`, '_blank')
+  }
+  function openExplorerHash(hash) {
+    window.open(`${currentChainConfig.value.explorer}/transaction/info?hash=${hash}`, '_blank')
   }
 
   async function uploadJson(data={}) {
@@ -251,12 +261,14 @@ export const useWalletStore = defineStore('wallet', () => {
     disconnect,
     copyAddress,
     openExplorer,
+    openExplorerHash,
     init,
     checkNetwork,
     invokeView,
     contractCall,
     currentChainConfig,
     nulsBalance,
+    getBalance,
     nulsUsdPrice,
     uploadJson,
     uploadFile,

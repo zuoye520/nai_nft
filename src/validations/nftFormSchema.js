@@ -31,7 +31,7 @@ export const nftFormSchema = yup.object({
     .number()
     .nullable()
     .default(null) // 设置默认值，避免初始验证
-    .min(10, 'Minimum mint price is 10 NULS'),
+    .min(1, 'Minimum mint price is 1 NULS'),
   
   mintPercent: yup
     .number()

@@ -27,9 +27,9 @@
           :nft="nft"
           :tradeType="nft.phase"
         />
-        <TransactionsTab v-else-if="activeTab === 'transactions'" :nft="nft" :transactions = "transactions"/>
-        <RepliesTab v-else-if="activeTab === 'replies'" :nft="nft" :replies="replies"/>
-        <HoldersTab v-else-if="activeTab === 'holders'" :nft="nft" :holders = "holders"/>
+        <TransactionsTab v-else-if="activeTab === 'transactions'" :nft="nft" :isLoading="isLoading"/>
+        <RepliesTab v-else-if="activeTab === 'replies'" :nft="nft"  :isLoading="isLoading"/>
+        <HoldersTab v-else-if="activeTab === 'holders'" :nft="nft" :holders = "holders" :isLoading="isLoading" />
       </div>
     </div>
   </div>
@@ -55,7 +55,7 @@ import { useNftStore } from '../stores/nft'
 const nftStore = useNftStore()
 const { nftInfo:nft,nftHolders:holders,replies,transactions,prices } = storeToRefs(nftStore)
 const route = useRoute()
-
+const loading = inject('loading')
 
 const activeTab = ref('info')
 const tabs = [
@@ -66,17 +66,21 @@ const tabs = [
   { id: 'replies', name: 'Reply' },
   { id: 'holders', name: 'Holders' }
 ]
-const handleActiveTab = (id)=>{
+
+const isLoading = ref(false); //局部loading
+const handleActiveTab = async (id)=>{
+  isLoading.value = true
   activeTab.value = id
   if(id == 'holders'){
-    nftStore.getNftHolders(route.params.id)
+    await nftStore.getNftHolders(route.params.id)
   }else if(id == 'replies'){
-    nftStore.getNftReplyList({id:route.params.id})
+    await nftStore.getNftReplyList({id:route.params.id})
   }else if(id == 'transactions'){
-    nftStore.getNftTxn({id:route.params.id})
+    await nftStore.getNftTxn({id:route.params.id})
   }else if(id == 'chart'){
-    nftStore.getNftPrice({id:route.params.id})
+    await nftStore.getNftPrice({id:route.params.id})
   }
+  isLoading.value = false
 }
 onBeforeMount(() => {
   console.log('Component will be mounted')
@@ -85,7 +89,10 @@ onBeforeMount(() => {
 onMounted(() => {
   initData()
 })
-const initData = ()=>{
-  nftStore.getNFTInfo(route.params.id)
+const initData = async ()=>{
+  loading.show('Loading ...')
+  await nftStore.getNFTInfo(route.params.id)
+  await walletStore.getBalance()
+  loading.hide()
 }
 </script>

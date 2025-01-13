@@ -8,6 +8,7 @@ import './styles/global.css' // 添加新的全局样式
 import * as config from './config'
 import * as format from './utils/format'
 import copy from 'copy-to-clipboard';
+import { ToastPlugin } from './plugins/toast'
 
 const app = createApp(App)
 // 全局配置
@@ -17,4 +18,5 @@ app.config.globalProperties.$copy = copy
 
 app.use(createPinia())
 app.use(router)
+app.use(ToastPlugin)
 app.mount('#app')

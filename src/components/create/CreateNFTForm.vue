@@ -63,7 +63,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted,onBeforeMount,computed,getCurrentInstance } from 'vue'
+import { ref, inject,onMounted,onBeforeMount,computed,getCurrentInstance } from 'vue'
 import { useWalletStore } from '../../stores/wallet'
 import { storeToRefs } from 'pinia'
 const walletStore = useWalletStore()
@@ -79,7 +79,7 @@ import DescriptionSection from "./sections/DescriptionSection.vue";
 import SocialLinksSection from "./sections/SocialLinksSection.vue";
 import GasFeeNotice from "./notices/GasFeeNotice.vue";
 import { useNFTValidation } from "../../composables/useNFTValidation";
-
+const loading = inject('loading')
 const router = useRouter();
 const showSocial = ref(false);
 
@@ -95,6 +95,7 @@ const handleBlur = (field) => {
 };
 
 const onSubmit = handleSubmit(async (values) => {
+  loading.show('Transaction processing ...')
   try {
     //上传图片
     const resImg = await walletStore.uploadFile(values.image)
@@ -130,10 +131,14 @@ const onSubmit = handleSubmit(async (values) => {
     console.log('createToken data:',data)
     const result = await walletStore.contractCall(data)
     console.log('createToken result:',result)
+    proxy.$toast.show('Transaction Submitted', 'success')
     //成功跳转首页
     router.push("/");
   } catch (error) {
     console.error("Error submitting form:", error);
+    proxy.$toast.show('Failed to create NFT', 'error')
+  } finally{
+    loading.hide()
   }
 });
 

@@ -41,8 +41,8 @@
       type="number"
       v-model="values.mintPrice"
       :error="errors.mintPrice"
-      placeholder="10"
-      min="10"
+      placeholder="1"
+      min="1"
       step="0.1"
       required
       @blur="$emit('blur', 'mintPrice')"

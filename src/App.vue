@@ -1,5 +1,15 @@
 <template>
   <div class="min-h-screen text-white">
+    <!-- Global Loading -->
+    <BaseLoading 
+      v-if="isLoading"
+      :message="loadingText"
+      fullscreen
+    />
+    
+    <!-- Global Toast -->
+    <BaseToast ref="toastRef" />
+    
     <AnimatedBackground />
     
     <nav class="fixed top-0 left-0 right-0 z-40 bg-black/50 backdrop-blur-lg border-b border-gray-800">
@@ -34,10 +44,53 @@
 </template>
 
 <script setup>
+import { ref, provide,onMounted } from 'vue'
+import { setToastInstance } from './plugins/toast'
+import BaseLoading from './components/BaseLoading.vue'
+import BaseToast from './components/BaseToast.vue'
 import ConnectWalletButton from './components/ConnectWalletButton.vue'
 import AnimatedBackground from './components/AnimatedBackground.vue'
 import GradientText from './components/GradientText.vue'
 import WalletModal from './components/wallet/WalletModal.vue'
+
+const urlParams = new URLSearchParams(window.location.search);
+const inviteCode = ref(urlParams.get("inviteCode"));
+
+// Loading state
+const isLoading = ref(false)
+const loadingText = ref('')
+
+// Loading provider
+provide('loading', {
+  show: (text = 'Loading...') => {
+    loadingText.value = text
+    isLoading.value = true
+  },
+  hide: () => {
+    isLoading.value = false
+    loadingText.value = ''
+  }
+})
+
+// Toast state and provider
+// const toastRef = ref(null)
+
+// provide('toast', {
+//   show: (message, type = 'info') => {
+//     toastRef.value?.addToast(message, type)
+//   }
+// })
+// Toast setup
+const toastRef = ref(null)
+
+onMounted(() => {
+  // Set global toast instance
+  setToastInstance(toastRef.value)
+  //缓存邀请码
+  localStorage.setItem('inviteCode',inviteCode.value)
+})
+
+
 </script>
 
 <style>

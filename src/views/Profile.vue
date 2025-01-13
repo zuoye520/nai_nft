@@ -54,21 +54,32 @@
       </div>
 
       <!-- NFT Grid -->
-      <div v-show="activeTab === 'held'" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <NFTCard 
-          v-for="nft in heldNFTs" 
-          :key="nft.id" 
-          :nft="nft"
-          :tokenid="activeTab === 'held'"
-        />
-      </div>
-      <div v-show="activeTab === 'created'" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <NFTCard 
-          v-for="nft in createdNFTs" 
-          :key="nft.id" 
-          :nft="nft"
-        />
-      </div>
+      <BaseLocalLoading 
+          :active="isLoading"
+          message="Loading data..."
+        >
+        <div v-show="activeTab === 'held'" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <NFTCard 
+              v-for="nft in heldNFTs" 
+              :key="nft.id" 
+              :nft="nft"
+              :tokenid="activeTab === 'held'"
+            />
+        </div>
+        <div v-show="activeTab === 'created'" class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        
+          <NFTCard 
+            v-for="nft in createdNFTs" 
+            :key="nft.id" 
+            :nft="nft"
+          />
+        </div>
+      </BaseLocalLoading>
+      <BasePagination
+            v-model:currentPage="currentPage"
+            :pageSize="pageSize"
+            :total="listTotal"
+          />
 
       <!-- Empty State -->
       <div v-if="heldNFTs.length === 0" class="text-center py-12">
@@ -86,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted,onBeforeMount,computed,getCurrentInstance } from 'vue'
+import { ref,watch, onMounted,onBeforeMount,computed,getCurrentInstance } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useRoute } from 'vue-router'
 const route = useRoute()
@@ -94,20 +105,38 @@ const { proxy } = getCurrentInstance();
 
 import { DocumentDuplicateIcon, ArrowTopRightOnSquareIcon } from '@heroicons/vue/24/outline'
 import NFTCard from '../components/NFTCard.vue'
+import BasePagination from '../components/BasePagination.vue'
+import BaseLocalLoading from '../components/BaseLocalLoading.vue'
 import { useWalletStore } from '../stores/wallet'
 const store = useWalletStore()
 import { useNftStore } from '../stores/nft'
 const nftStore = useNftStore()
-const { heldNFTs,createdNFTs } = storeToRefs(nftStore)
+const { heldNFTs,createdNFTs,listTotal } = storeToRefs(nftStore)
 const address = ref('')
 const activeTab = ref('held')
 const tabs = [
   { id: 'held', name: 'NFTs Held' },
   { id: 'created', name: 'NFTs Created' }
 ]
+const isLoading = ref(true)
+
+const currentPage = ref(1)
+const pageSize = ref(16)
+const total = ref(16)
+
+
+// 监听页码变化
+watch(currentPage, (newPage) => {
+  console.log('newPage:',newPage)
+  // 加载新页数据
+  initData(newPage)
+})
 
 const handleActiveTab = (id)=>{
   activeTab.value = id
+  currentPage.value = 1
+  listTotal.value = 0
+  initData(id)
 }
 
 onBeforeMount(() => {
@@ -117,13 +146,22 @@ onMounted(() => {
   address.value = route.params.address
   initData()
 })
-const initData = ()=>{
-  nftStore.getHeldNFTs({
-    address:address.value
-  })
-  nftStore.getCreatedNFTs({
-    address:address.value
-  })
+const initData = async (tab)=>{
+  isLoading.value = true
+  if( activeTab.value == 'created'){
+    await nftStore.getCreatedNFTs({
+      address:address.value,
+      pageNum:currentPage.value,
+      pageSize:pageSize.value
+    })
+  }else{
+    await nftStore.getHeldNFTs({
+      address:address.value,
+      pageNum:currentPage.value,
+      pageSize:pageSize.value
+    })
+  }
+  isLoading.value = false
 }
 
 </script>

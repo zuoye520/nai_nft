@@ -20,7 +20,7 @@ const router = createRouter({
     { path: '/nft/:id', component: NFTDetails },
     { path: '/profile/:address', component: Profile },
     { path: '/rewards/:address', component: Rewards },
-    { path: '/refer', component: Refer },
+    { path: '/refer/:address', component: Refer },
     { path: '/chart', component: Chart }
   ]
 })

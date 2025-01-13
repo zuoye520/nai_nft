@@ -3,14 +3,18 @@ import { ref, computed } from 'vue'
 import copy from 'copy-to-clipboard';
 import * as api from '../services/api'
 import { useWalletStore } from './wallet';
+import { useGlobalToast } from '../plugins/toast'
 export const useReferStore = defineStore('refer', () => {
   const walletStore = useWalletStore();
-  const referralLink = ref(`https://nuls.io?ref=${walletStore.account}`)
+  const toast = useGlobalToast()
+
+  const referralLink = ref(``)
 
   const stats = ref({
     totalReferrals: 0,
     totalEarnings: '0'
   })
+  const referralHistoryTotal = ref(0)
   // Mock
   const referralHistory = ref([
     {
@@ -25,13 +29,16 @@ export const useReferStore = defineStore('refer', () => {
     }
   ])
   //奖励列表
-  async function getHistoryRefers() {
-    const result = await api.historyRefers();
-    nfts.value = result.list;
+  async function getHistoryRefers(params) {
+    const result = await api.historyRefers(params);
+    referralHistoryTotal.value = result.totalCount
+    referralHistory.value = result.list;
+
   }
   //copy 邀请链接
   function copyReferralLink(){
-    copy(account.value)
+    copy(referralLink.value)
+    toast.show('Copy Success', 'success')
   }
 
   return {
@@ -39,6 +46,7 @@ export const useReferStore = defineStore('refer', () => {
     stats,
     referralHistory,
     copyReferralLink,
+    referralHistoryTotal,
     getHistoryRefers
   }
 })

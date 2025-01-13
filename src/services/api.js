@@ -109,7 +109,7 @@ export const nftHeldList = async (params= {})=>{
   const  data = {
     address:params.address,
     pageNum: params.pageNum || 1,
-    pageSize: params.pageSize || 10,
+    pageSize: params.pageSize || 16,
   }
   if(params.nftId >= 0 ) data.nftId = params.nftId
   const url = `${API_URL}/user/nft/held`;
@@ -128,7 +128,7 @@ export const nftCreatedList = async (params= {})=>{
   const  data = {
     address:params.address,
     pageNum: params.pageNum || 1,
-    pageSize: params.pageNum || 10,
+    pageSize: params.pageSize || 16,
   }
   const url = `${API_URL}/user/nft/created`;
   const response = await sendRequest(url, { data, method: 'post' });
@@ -146,7 +146,7 @@ export const historyRewards = async (params= {})=>{
   const data = {
     address:params.address,
     pageNum: params.pageNum || 1,
-    pageSize: params.pageNum || 10,
+    pageSize: params.pageSize || 10,
   }
   const url = `${API_URL}/user/reward`;
   const response = await sendRequest(url, { data, method: 'post' });
@@ -162,8 +162,9 @@ export const historyRewards = async (params= {})=>{
  */
 export const historyRefers = async (params= {})=>{
   const  data = {
-    "pageNum": 0,
-    "pageSize": 10,
+    address:params.address,
+    pageNum: params.pageNum || 1,
+    pageSize: params.pageSize || 10,
   }
   const url = `${API_URL}/user/refer`;
   const response = await sendRequest(url, { data, method: 'post' });
@@ -181,9 +182,9 @@ export const historyRefers = async (params= {})=>{
 export const nftList = async (params= {})=>{
   const  data = {
     pageNum: params.pageNum || 1,
-    pageSize: params.pageSize || 10,
-    keyword: params.keyword || "",
-    projectState: params.projectState,//Mint / Swap
+    pageSize: params.pageSize || 16,
+    keyword: params.keyword || "",//关键词搜索
+    projectState: params.projectState || "",//Mint / Swap
     orderBy: params.orderBy || "DESC", // ASC / DESC
   }
   const url = `${API_URL}/nft/list`;

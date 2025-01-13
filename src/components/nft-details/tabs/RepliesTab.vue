@@ -19,85 +19,82 @@
     </div>
 
     <!-- Replies List -->
-    <div class="space-y-6">
-      <div v-for="reply in replies" :key="reply.id" class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
-        <div class="flex items-start space-x-4">
-          <img :src="reply.avatar" :alt="reply.author" class="w-10 h-10 rounded-full">
-          <div class="flex-1">
-            <div class="flex items-center space-x-2">
-              <router-link :to="`/profile/${reply.author}`" class="text-white font-medium">{{ $format.shortenAddress(reply.author) }}</router-link>
-              <span class="text-gray-400 text-sm">{{ $format.formatDate(reply.timestamp) }}</span>
+    <BaseLocalLoading :active="isLoading" message="Loading data...">
+      <div class="space-y-6">
+        <div v-for="reply in nftStore.replies" :key="reply.id" class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+          <div class="flex items-start space-x-4">
+            <img :src="reply.avatar" :alt="reply.author" class="w-10 h-10 rounded-full">
+            <div class="flex-1">
+              <div class="flex items-center space-x-2">
+                <router-link :to="`/profile/${reply.author}`" class="text-white font-medium">{{ $format.shortenAddress(reply.author) }}</router-link>
+                <span class="text-gray-400 text-sm">{{ $format.formatDate(reply.timestamp) }}</span>
+              </div>
+              <p class="mt-2 text-gray-300">{{ reply.content }}</p>
             </div>
-            <p class="mt-2 text-gray-300">{{ reply.content }}</p>
-            <!-- <div class="mt-4 flex items-center space-x-4">
-              <button class="text-gray-400 hover:text-gray-300 flex items-center space-x-1">
-                <HandThumbUpIcon class="w-4 h-4" />
-                <span>{{ reply.likes }}</span>
-              </button>
-              <button class="text-gray-400 hover:text-gray-300">Reply</button>
-            </div> -->
           </div>
         </div>
       </div>
-    </div>
+    </BaseLocalLoading>
+    <BasePagination
+      v-model:currentPage="currentPage"
+      :pageSize="pageSize"
+      :total="nftStore.repliesTotal"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref,inject,watch,getCurrentInstance } from 'vue'
 import { useWalletStore } from '../../../stores/wallet'
 const walletStore = useWalletStore()
 import { useNftStore } from '../../../stores/nft'
 const nftStore = useNftStore()
 import { HandThumbUpIcon } from '@heroicons/vue/24/outline'
 import BaseButton from '../../BaseButton.vue'
-
+import BaseLocalLoading from "../../../components/BaseLocalLoading.vue";
+import BasePagination from '../../../components/BasePagination.vue'
+const { proxy } = getCurrentInstance();
+const loading = inject('loading')
 const props = defineProps({
+  isLoading: {
+    type: Boolean,
+    required: true,
+  },
   nft: {
     type: Object,
     required: true
   },
-  replies: {
-    type: Array,
-    required: true
-  }
 })
 
 const newReply = ref('')
+const currentPage = ref(1)
+const pageSize = ref(10)
+const total = ref(0)
 
-// Mock replies data
-// const replies = [
-//   {
-//     id: 1,
-//     author: 'User1',
-//     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=1',
-//     content: 'Great NFT collection!',
-//     timestamp: Date.now() - 3600000,
-//     likes: 5
-//   },
-//   {
-//     id: 2,
-//     author: 'User2',
-//     avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=2',
-//     content: 'Looking forward to the next drop!',
-//     timestamp: Date.now() - 7200000,
-//     likes: 3
-//   }
-// ]
-
+// 监听页码变化
+watch(currentPage, (newPage) => {
+  console.log('newPage:',newPage)
+  // 加载新页数据
+  initData()
+})
+const initData = ()=>{
+  nftStore.getNftReplyList({
+    id:props.nft.id,
+    pageNum: currentPage.value,
+    pageSize: pageSize.value,
+  })
+}
 const handleSubmitReply = async () => {
   if (!newReply.value.trim()) return
+  loading.show('Loading ...')
   // Handle reply submission
   console.log('Submitting reply:', newReply.value)
   
   await nftStore.nftReply({id:props.nft.id,content:newReply.value})
-  await nftStore.getNftReplyList({id:props.nft.id})
+  initData()
   newReply.value = ''
+  loading.hide()
+  proxy.$toast.show('Reply Success', 'success')
 }
-// const shortenAddress = (address) => {
-//   return `${address.slice(0, 6)}...${address.slice(-4)}`
-// }
-// const formatDate = (timestamp) => {
-//   return new Date(timestamp).toLocaleString()
-// }
+
 </script>

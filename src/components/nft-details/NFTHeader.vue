@@ -1,9 +1,33 @@
 <template>
   <div class="lg:grid lg:grid-cols-2 lg:gap-8">
-    <!-- NFT Image -->
+    <!-- NFT Image with Lazy Loading -->
     <div class="relative">
       <div class="aspect-w-1 aspect-h-1 rounded-xl overflow-hidden">
-        <img :src="nft.image" :alt="nft.name" class="w-full h-full object-cover">
+        <!-- Loading Placeholder -->
+        <div 
+          v-show="!imageLoaded"
+          class="absolute inset-0 bg-gray-800 animate-pulse flex items-center justify-center"
+        >
+          <div class="w-12 h-12 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
+
+        <!-- Background Blur Effect -->
+        <div 
+          class="absolute inset-0 bg-gradient-to-r from-green-500/20 to-blue-500/20 
+                 filter blur-xl opacity-0 transition-opacity duration-700"
+          :class="{ 'opacity-30': imageLoaded }"
+        ></div>
+
+        <!-- Lazy Loaded Image -->
+        <img 
+          :src="nft.image" 
+          :alt="nft.name" 
+          class="w-full h-full object-cover transition-all duration-700"
+          :class="{ 'opacity-0': !imageLoaded, 'opacity-100': imageLoaded }"
+          loading="lazy"
+          @load="onImageLoad"
+          ref="imageRef"
+        >
       </div>
     </div>
 
@@ -14,7 +38,9 @@
       <div class="mt-6">
         <div class="flex items-center space-x-2">
           <span class="text-gray-400">Created by</span>
-          <router-link :to="`/profile/${nft.creator}`" class="text-white font-medium">{{ $format.shortenAddress(nft.creator) }}</router-link>
+          <router-link :to="`/profile/${nft.creator}`" class="text-white font-medium">
+            {{ $format.shortenAddress(nft.creator) }}
+          </router-link>
         </div>
       </div>
 
@@ -58,7 +84,7 @@
                   v-for="preset in [1, 5, 10, 20]" 
                   :key="preset"
                   @click="amount = preset"
-                  class="px-2 py-1 text-sm rounded bg-gray-800 text-gray-400 hover:text-green-400 transition-colors"
+                  class="px-2 py-1 text-sm rounded bg-gray-800 text-gray-400 hover:text-green-400 transition-colors "
                 >
                   {{ preset }}
                 </button>
@@ -72,6 +98,10 @@
               <span class="text-gray-400">Price per NFT</span>
               <span class="text-white">{{ nft.mintPrice }} NULS</span>
             </div>
+            <div v-if="account" class="flex justify-between text-sm font-medium">
+              <span class="text-gray-400">Available balance</span>
+              <span class="text-green-400">{{$format.fromAmount( walletStore.nulsBalance) }} NULS</span>
+            </div>
             <div class="flex justify-between text-sm font-medium">
               <span class="text-gray-400">Total</span>
               <span class="text-green-400">{{ totalMintAmount }} NULS</span>
@@ -79,7 +109,7 @@
           </div>
 
           <BaseButton 
-          v-if="account"
+            v-if="account"
             primary 
             class="w-full"
             @click="handleMint"
@@ -88,7 +118,7 @@
             Mint Now
           </BaseButton>
           <BaseButton 
-          v-else
+            v-else
             primary 
             class="w-full"
             @click="walletStore.connect"
@@ -130,6 +160,7 @@
                 <input
                   type="number"
                   v-model="amount"
+                  @blur="checkPrice(amount)"
                   class="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   :placeholder="`Enter amount to ${tradeType}`"
                   min="1"
@@ -149,15 +180,15 @@
 
             <!-- Price Summary -->
             <div class="space-y-3 border-t border-gray-800 pt-4">
-              <!-- <div class="flex justify-between text-sm">
-                <span class="text-gray-400">Price per NFT</span>
-                <span class="text-white">{{ nft.price }} NULS</span>
-              </div> -->
               <div class="flex justify-between text-sm">
                 <span class="text-gray-400">
                   {{ tradeType === 'buy' ? 'Buy' : 'Sell' }} Fee 
                 </span>
                 <span class="text-white">{{ getFeePercentage }}%</span>
+              </div>
+              <div v-if="account" class="flex justify-between text-sm font-medium">
+                <span class="text-gray-400">Available balance</span>
+                <span  class="text-green-400">{{ tradeType === 'buy' ? `${$format.fromAmount( walletStore.nulsBalance)} NULS`: `${nftStore.listTotal} NFT`}} </span>
               </div>
               <div class="flex justify-between text-sm font-medium">
                 <span class="text-gray-400">{{ tradeType === 'buy' ? 'Cost' : 'Get' }}</span>
@@ -176,12 +207,12 @@
             </BaseButton>
             <BaseButton 
               v-else
-                primary 
-                class="w-full"
-                @click="walletStore.connect"
-              >
-                Connect
-              </BaseButton>
+              primary 
+              class="w-full"
+              @click="walletStore.connect"
+            >
+              Connect
+            </BaseButton>
           </div>
         </template>
       </div>
@@ -190,15 +221,15 @@
 </template>
 
 <script setup>
-import { ref, computed,getCurrentInstance} from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount,getCurrentInstance } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '../../stores/wallet'
-const walletStore = useWalletStore()
 import { useNftStore } from '../../stores/nft'
-const nftStore = useNftStore()
-const { account, currentChainConfig} = storeToRefs(walletStore)
-const { proxy } = getCurrentInstance()
 import BaseButton from '../BaseButton.vue'
+const { proxy } = getCurrentInstance()
+const walletStore = useWalletStore()
+const nftStore = useNftStore()
+const { account, currentChainConfig } = storeToRefs(walletStore)
 
 const props = defineProps({
   nft: {
@@ -207,12 +238,18 @@ const props = defineProps({
   }
 })
 
+// Image lazy loading state
+const imageRef = ref(null)
+const imageLoaded = ref(false)
+const observer = ref(null)
+
+// Trading state
 const amount = ref('')
 const tradeType = ref('buy')
 const swapPrice = ref(0)
 const totalSwapAmount = ref(0)
 
-// Computed Properties
+// Computed properties
 const mintProgress = computed(() => {
   return ((props.nft.mintedSupply / (props.nft.totalSupply * props.nft.mintPercent / 100)) * 100).toFixed(1)
 })
@@ -222,30 +259,17 @@ const isMintPhase = computed(() => {
 })
 
 const remainingSupply = computed(() => {
-  return  (props.nft.totalSupply * props.nft.mintPercent / 100) - props.nft.mintedSupply
+  return (props.nft.totalSupply * props.nft.mintPercent / 100) - props.nft.mintedSupply
 })
 
 const getFeePercentage = computed(() => {
   return tradeType.value === 'buy' ? props.nft.buyFee : props.nft.sellFee
 })
 
-// const calculateFee = computed(() => {
-//   if (!amount.value) return 0
-//   const baseAmount = Number(amount.value) * props.nft.price
-//   return ((baseAmount * getFeePercentage.value) / 100).toFixed(2)
-// })
-
 const totalMintAmount = computed(() => {
   if (!amount.value) return 0
   return (Number(amount.value) * props.nft.mintPrice).toFixed(2)
 })
-
-// const totalSwapAmount = computed(() => {
-//   if (!amount.value) return 0
-//   const baseAmount = Number(amount.value) * swapPrice.value
-//   // const fee = Number(calculateFee.value)
-//   return (baseAmount).toFixed(2)
-// })
 
 const canMint = computed(() => {
   if (!amount.value || Number(amount.value) <= 0) return false
@@ -257,93 +281,164 @@ const canSwap = computed(() => {
 })
 
 // Methods
+const onImageLoad = () => {
+  imageLoaded.value = true
+}
+
+const checkPrice = async (preset) => {
+  amount.value = preset
+  const methodName = tradeType.value == "buy" ? "getBuyCost" : "getSellAmount"
+  const data = {
+    contractAddress: currentChainConfig.value.contracts.mainAddress,
+    methodName: methodName,
+    args: [
+      props.nft.pid,
+      amount.value,
+    ]
+  }
+  const result = await walletStore.invokeView(data)
+  totalSwapAmount.value = proxy.$format.fromAmount(result.result) 
+}
+
 const handleMint = async () => {
   try {
-    console.log('Minting:', {
-      pid:props.nft.pid,
-      amount: amount.value,
-      totalCost: totalMintAmount.value
-    })
+    const balance = proxy.$format.fromAmount(walletStore.nulsBalance)
+    if( balance*1 < totalMintAmount.value*1){
+      proxy.$toast.show('Insufficient balance', 'error')
+      return;
+    }
     const data = {
       from: account.value,
-      value: totalMintAmount.value,//mint费用
+      value: totalMintAmount.value,
       contractAddress: currentChainConfig.value.contracts.mainAddress,
       methodName: "mint",
       args: [
-        props.nft.pid,//pid    
-        amount.value,//mint数据
+        props.nft.pid,
+        amount.value,
       ]
     }
-    console.log('mint data:',data)
     const result = await walletStore.contractCall(data)
-    console.log('mint result:',result)
-
+    console.log('mint result:', result)
+    proxy.$toast.show('Transaction Submitted', 'success')
   } catch (error) {
     console.error('Mint error:', error)
+    proxy.$toast.show('Mint error', 'error')
   }
 }
-const checkPrice = async (preset)=>{
-  amount.value = preset;
-  const methodName = tradeType.value == "buy" ? "getBuyCost" : "getSellAmount" 
-  const data = {
-      contractAddress: currentChainConfig.value.contracts.mainAddress,
-      methodName: methodName,
-      args: [
-        props.nft.pid,//pid    
-        amount.value,//数量
-      ]
-    }
-  const result = await walletStore.invokeView(data)
-  console.log('result:',result)
-  totalSwapAmount.value =  proxy.$format.fromAmount(result.result)
-}
+
+
 
 const handleSwap = async () => {
   try {
-    console.log(`${tradeType.value}ing:`, {
-      amount: amount.value,
-      totalCost: totalSwapAmount.value,
-    })
+    
     let data = {
       from: account.value,
-      value: totalSwapAmount.value,//mint费用
+      value: totalSwapAmount.value,
       contractAddress: currentChainConfig.value.contracts.mainAddress,
-      methodName: "buyToken" ,//buyToken/sellToken
+      methodName: "buyToken",
       args: [
-        props.nft.pid,//pid    
-        amount.value,//mint数据
+        props.nft.pid,
+        amount.value,
       ]
     }
-    if(tradeType.value == 'sell'){
-      //获取持有的NFT
-      const heldList = await nftStore.getHeldNFTs({
-        address:account.value,
-        nftId:props.nft.id,
-        pageSize:amount.value
-      })
-      if(heldList.length < amount.value){
-        console.log('nft 余额不足')
+    if (tradeType.value == 'buy') {
+      const balance = proxy.$format.fromAmount(walletStore.nulsBalance)
+      if( balance*1 < totalSwapAmount.value*1){
+        proxy.$toast.show('Insufficient balance', 'error')
         return;
       }
-      const nftIds = heldList.map((item)=>{
-        return item.tokenId;
-      })
-      console.log('nftIds:',nftIds)
+    }else if (tradeType.value == 'sell') {
+      if (nftStore.listTotal < amount.value) {
+        proxy.$toast.show('Insufficient NFT balance', 'error')
+        return;
+      }
+      const nftIds = [] //heldList.map((item) => item.tokenId)
+      for (let i = 0; i < amount.value; i++) {
+        const item = nftStore.heldNFTs[i];
+        nftIds.push(item.tokenId)
+      }
       data = {
         from: account.value,
         contractAddress: currentChainConfig.value.contracts.mainAddress,
-        methodName: "sellToken" ,//buyToken/sellToken
+        methodName: "sellToken",
         args: [
-          props.nft.pid,//pid    
-          nftIds,//nftIds
+          props.nft.pid,
+          nftIds,
         ]
       }
     }
-    console.log('swap data:',data)
     const result = await walletStore.contractCall(data)
-    console.log('swap result:',result)
+    console.log('swap result:', result)
+    proxy.$toast.show('Transaction Submitted', 'success')
   } catch (error) {
     console.error('Swap error:', error)
+    proxy.$toast.show('Swap error', 'error')
   }
 }
+const intervalId = ref(null) 
+// Lifecycle hooks
+onMounted(() => {
+  initData()
+  observer.value = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const img = entry.target
+        if (img.dataset.src) {
+          img.src = img.dataset.src
+          img.removeAttribute('data-src')
+          observer.value.unobserve(img)
+        }
+      }
+    })
+  }, {
+    root: null,
+    rootMargin: '50px',
+    threshold: 0.1
+  })
+
+  if (imageRef.value) {
+    observer.value.observe(imageRef.value)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (observer.value) {
+    observer.value.disconnect()
+  }
+  clearInterval(intervalId.value);
+})
+
+//初始化数据
+const initData = ()=>{
+  intervalId.value = setInterval(async () => {
+    if(account.value){
+      //钱包余额
+      walletStore.getBalance()
+      //持有的NFT数量
+      nftStore.getHeldNFTs({
+        address: account.value,
+        nftId: props.nft.id,
+        pageSize: 20
+      })
+    }
+    nftStore.getNFTInfo(props.nft.id)
+  }, 3000);//3秒执行一次
+}
 </script>
+
+<style scoped>
+.aspect-w-1 {
+  position: relative;
+  padding-bottom: 100%;
+}
+
+.aspect-w-1 > * {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+</style>

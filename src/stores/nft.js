@@ -92,6 +92,7 @@ export const useNftStore = defineStore('nft', () => {
       website: ''
     }
   })
+  const listTotal = ref(0)
   // 持有的NFT Mock
   const heldNFTs = ref([
     {
@@ -131,6 +132,7 @@ export const useNftStore = defineStore('nft', () => {
     joinDate: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
   }])
   //回复列表 Mock
+  const repliesTotal = ref(0)
   const replies = ref([
     {
       id: 1,
@@ -141,7 +143,9 @@ export const useNftStore = defineStore('nft', () => {
       likes: 5
     }
   ])
+  
   //NFT txn Mock
+  const transactionsTotal = ref(0)
   const transactions =ref([
     {
       hash: '0x789...',
@@ -180,8 +184,8 @@ export const useNftStore = defineStore('nft', () => {
 ])
 
   // 获取首页NFT列表
-  async function getNFTs() {
-    const result = await api.nftList();
+  async function getNFTs(params) {
+    const result = await api.nftList(params);
     const list = result.list.map((item)=>{
       item.name = item.collectionName
       item.image = IPFS_GATEWAY + item.uri
@@ -222,6 +226,7 @@ export const useNftStore = defineStore('nft', () => {
       item.marketValue = item.projectState =='Swap'? fromAmount(item.minted * item.currentPrice) : fromAmount(item.minted * item.mintPrice) //市值
       return item
     })
+    listTotal.value = result.totalCount
     heldNFTs.value = list;
     return list;
   }
@@ -237,6 +242,7 @@ export const useNftStore = defineStore('nft', () => {
       item.marketValue = item.projectState =='Swap'? fromAmount(item.minted * item.currentPrice) : fromAmount(item.minted * item.mintPrice) //市值
       return item
     })
+    listTotal.value = result.totalCount
     createdNFTs.value = list;
   }
   //获取top holders
@@ -261,6 +267,7 @@ export const useNftStore = defineStore('nft', () => {
       item.avatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=12'
       return item
     })
+    repliesTotal.value = result.totalCount
     replies.value = list;
   }
   //回复
@@ -274,7 +281,7 @@ export const useNftStore = defineStore('nft', () => {
     const result = await api.nftTxn(params);
     const list = result.list.map((item)=>{
       item.txHash = item.txHash
-      item.type = item.txType
+      item.type = item.txType =='Swap' ? item.tradeDirection: item.txType
       item.from = item.userAddress
       item.amount = fromAmount(item.amount)
       item.luckyBonus = item.luckyBonus && fromAmount(item.luckyBonus)
@@ -282,6 +289,7 @@ export const useNftStore = defineStore('nft', () => {
       item.timestamp = item.createdDate
       return item
     })
+    transactionsTotal.value = result.totalCount
     transactions.value = list;
   }
   //获取价走势
@@ -297,13 +305,16 @@ export const useNftStore = defineStore('nft', () => {
     replies,
     transactions,
     prices,
+    listTotal,
     heldNFTs,
     createdNFTs,
     getNFTs,
     getNFTInfo,
     getNftHolders,
     getNftReplyList,
+    repliesTotal,
     nftReply,
+    transactionsTotal,
     getNftTxn,
     getNftPrice,
     getHeldNFTs,
