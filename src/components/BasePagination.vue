@@ -1,5 +1,5 @@
 <template>
-  <div class="flex items-center justify-between px-4 py-3 sm:px-6" >
+  <div v-if="totalPages > 1" class="flex items-center justify-between px-4 py-3 sm:px-6" >
     <!-- Mobile View -->
     <div class="flex flex-1 justify-between sm:hidden">
       <button
