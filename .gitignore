@@ -38,6 +38,5 @@ pids
 Thumbs.db
 
 # build 
-dist/
 
 yarn.lock
