@@ -5,7 +5,7 @@
         <div class="text-center mb-16">
           <h1 class="text-4xl font-bold text-white mb-6">How It Works</h1>
           <p class="text-xl text-gray-300 leading-relaxed">
-            pumpNFT — the world's first NFT + DEFI liquidity protocol, transforms NFT transactions from the traditional floor price model to a simpler Swap model, and continuously injects liquidity into NFT through NULS consensus node income, so that liquidity is inexhaustible.
+            PumpNFT — the world's first NFT + DEFI liquidity protocol, transforms NFT transactions from the traditional floor price model to a simpler Swap model, and continuously injects liquidity into NFT through NULS consensus node income, so that liquidity is inexhaustible.
           </p>
         </div>
   
