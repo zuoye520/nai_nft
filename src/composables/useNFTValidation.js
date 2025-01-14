@@ -7,7 +7,8 @@ export function useNFTValidation() {
     values, 
     errors,
     validateField,
-    setFieldValue 
+    setFieldValue,
+    validate // 添加 validate 方法
   } = useForm({
     validationSchema: nftFormSchema,
     validateOnBlur: true,    // 失焦验证
@@ -19,7 +20,7 @@ export function useNFTValidation() {
       image: null,
       mintPrice: null,
       mintPercent: null,
-      swapFee:null,
+      swapFee: null,
       buyFee: null,
       sellFee: null,
       description: null,
@@ -30,11 +31,19 @@ export function useNFTValidation() {
       }
     }
   })
+
+  // 添加表单验证方法
+  const validateForm = async () => {
+    const result = await validate()
+    return Object.keys(result.errors).length === 0
+  }
+
   return {
     handleSubmit,
     values,
     errors,
     validateField,
-    setFieldValue
+    setFieldValue,
+    validateForm // 导出 validateForm 方法
   }
 }

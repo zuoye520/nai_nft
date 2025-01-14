@@ -19,7 +19,7 @@
           <button 
           v-if="store.account"
           :disabled="rewards <= 0"
-            class="px-6 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-colors"
+            class="px-6 py-2 bg-white/10 backdrop-blur-sm text-white rounded-lg hover:bg-white/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             @click="handleWithdraw"
           >
             Withdraw
@@ -49,7 +49,11 @@
               </div>
             </div>
           </div>
+          <div v-if="rewardHistory.length === 0" class="text-center py-12">
+            <div class="text-gray-400">No Data found</div>
+          </div>
         </div>
+        
       </BaseLocalLoading>
       <BasePagination
         v-model:currentPage="currentPage"

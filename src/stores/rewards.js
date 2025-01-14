@@ -51,9 +51,11 @@ export const useRewardsStore = defineStore('rewards', () => {
     }
     let result = await walletStore.invokeView(data)
     console.log('userDomains result:',{data,result})
-    result = JSON.parse(result.result)
-    rewards.value = fromAmount(result.pending)
-    return 
+    if(result.result){
+      result = JSON.parse(result.result)
+      rewards.value = fromAmount(result.pending)
+    }
+    return;
   }
   //领取奖励
   async function receiveTiger() {

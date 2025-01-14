@@ -4,7 +4,14 @@
       {{ label }}
       <span v-if="required" class="text-red-500">*</span>
     </label>
-    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-800 border-dashed rounded-lg hover:border-green-500/50 transition-colors">
+    <div 
+      class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-dashed rounded-lg transition-colors"
+      :class="[
+        error 
+          ? 'border-red-500 hover:border-red-400' 
+          : 'border-gray-800 hover:border-green-500/50'
+      ]"
+    >
       <div class="space-y-1 text-center">
         <div v-if="preview" class="mb-4">
           <img :src="preview" alt="Preview" class="mx-auto h-32 w-32 object-cover rounded-lg" />
@@ -22,12 +29,12 @@
               class="sr-only" 
               @change="handleFileChange" 
               accept="image/*"
-              :required="required"
             >
           </label>
           <p class="pl-1">or drag and drop</p>
         </div>
         <p class="text-xs text-gray-400">PNG, JPG, GIF up to 10MB</p>
+        <p v-if="error" class="mt-2 text-sm text-red-500">{{ error }}</p>
       </div>
     </div>
   </div>
@@ -50,15 +57,20 @@ defineProps({
   required: {
     type: Boolean,
     default: false
+  },
+  error: {
+    type: String,
+    default: ''
   }
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'blur'])
 
 const handleFileChange = (event) => {
   const file = event.target.files[0]
   if (file) {
     emit('update:modelValue', file)
+    emit('blur', 'image')
   }
 }
 </script>

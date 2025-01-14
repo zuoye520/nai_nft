@@ -74,6 +74,19 @@
             :nft="nft"
           />
         </div>
+        <!-- Empty State -->
+        <div v-if="heldNFTs.length === 0 && activeTab === 'held'" class="text-center py-12">
+          <div class="text-gray-400">No NFTs found</div>
+        </div>
+        <div v-if="createdNFTs.length === 0 && activeTab === 'created'" class="text-center py-12">
+          <div class="text-gray-400">No NFTs found</div>
+          <router-link 
+            to="/create"
+            class="inline-block mt-4 px-6 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
+          >
+            Create Your First NFT
+          </router-link>
+        </div>
       </BaseLocalLoading>
       <BasePagination
             v-model:currentPage="currentPage"
@@ -81,17 +94,7 @@
             :total="listTotal"
           />
 
-      <!-- Empty State -->
-      <div v-if="heldNFTs.length === 0" class="text-center py-12">
-        <div class="text-gray-400">No NFTs found</div>
-        <router-link 
-          v-if="activeTab === 'created'" 
-          to="/create"
-          class="inline-block mt-4 px-6 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors"
-        >
-          Create Your First NFT
-        </router-link>
-      </div>
+      
     </div>
   </div>
 </template>

@@ -49,10 +49,10 @@
 
     <!-- Submit Button -->
     <div class="pt-6">
-      <BaseButton v-if ="account" type="submit" primary class="w-full">
-        Create Collection
+      <BaseButton v-if="account" type="submit" primary class="w-full" :disabled="isSubmitting || Object.keys(errors).length > 0">
+        {{ isSubmitting ? 'Creating...' : 'Create Collection' }}
       </BaseButton>
-      <BaseButton v-else primary class="w-full" @click="walletStore.connect">
+      <BaseButton v-else primary class="w-full" @click="walletStore.connect" :disabled="isSubmitting">
         Connect
       </BaseButton>
     </div>
@@ -63,11 +63,11 @@
 </template>
 
 <script setup>
-import { ref, inject,onMounted,onBeforeMount,computed,getCurrentInstance } from 'vue'
+import { ref, inject, onMounted, computed, getCurrentInstance } from 'vue'
 import { useWalletStore } from '../../stores/wallet'
 import { storeToRefs } from 'pinia'
 const walletStore = useWalletStore()
-const { account, currentChainConfig, } = storeToRefs(walletStore)
+const { account, currentChainConfig } = storeToRefs(walletStore)
 
 const { proxy } = getCurrentInstance();
 import { useRouter } from "vue-router";
@@ -79,37 +79,51 @@ import DescriptionSection from "./sections/DescriptionSection.vue";
 import SocialLinksSection from "./sections/SocialLinksSection.vue";
 import GasFeeNotice from "./notices/GasFeeNotice.vue";
 import { useNFTValidation } from "../../composables/useNFTValidation";
+
 const loading = inject('loading')
 const router = useRouter();
 const showSocial = ref(false);
+// const isSubmitting = ref(false);
 
-const { handleSubmit, values, errors, validateField, setFieldValue } =
-  useNFTValidation();
+const { handleSubmit, values, errors, validateField, setFieldValue, validateForm } = useNFTValidation();
 
 const handleFieldUpdate = async (field, value) => {
-  setFieldValue(field, value);
+  await setFieldValue(field, value);
+  if (field === 'image') {
+    await validateField(field);
+  }
 };
 
-const handleBlur = (field) => {
-  validateField(field);
+const handleBlur = async (field) => {
+  console.log('errors:',errors)
+  await validateField(field);
 };
+
+const isSubmitting = computed(() => {
+  return !values.collectionName || !values.nftCount || !values.image || !values.mintPrice || !values.mintPercent || !values.swapFee
+})
 
 const onSubmit = handleSubmit(async (values) => {
-  loading.show('Transaction processing ...')
+  if(!account.value) return;
   try {
+    // isSubmitting.value = true;
+    // 验证所有字段
+    const validationResult = await validateForm();
+    if (!validationResult) {
+      return;
+    }
+    loading.show('Transaction processing ...')
+    
     //上传图片
     const resImg = await walletStore.uploadFile(values.image)
     console.log('uploadFile result:', resImg)
-    // const uri = `https://${proxy.$config.IPFS_CONFIG.gateway}/ipfs/${resImg.IpfsHash}`
-    const uri = resImg.IpfsHash
+    const uri = resImg.IpfsHash 
     const ipfsJson = { ...values };
     ipfsJson.image = uri 
     const resJson = await walletStore.uploadJson(ipfsJson)
     console.log('uploadJson result:', resJson)
     const extendUri = resJson.IpfsHash 
-    console.log("Form submitted:", values);
-    // const uri = "bafkreihn327a2zr2emwdw2lj7bvwlld6kcd3jz6ybkyj6odnjpocswcdoa"
-    // const extendUri = "bafkreibdi2fbtsdw6rgl6ho7abts63na57kdf6e7mb2g4kgacjzxtkcl4a"
+    
     const data = {
       from: account.value,
       value: currentChainConfig.value.createPayment,//部署费用
@@ -128,24 +142,18 @@ const onSubmit = handleSubmit(async (values) => {
         values.swapFee * 100 //swap手续费
       ]
     }
-    console.log('createToken data:',data)
+    console.log('createToken data:', data)
     const result = await walletStore.contractCall(data)
-    console.log('createToken result:',result)
+    console.log('createToken result:', result)
     proxy.$toast.show('Transaction Submitted', 'success')
     //成功跳转首页
     router.push("/");
   } catch (error) {
     console.error("Error submitting form:", error);
-    proxy.$toast.show('Failed to create NFT', 'error')
-  } finally{
+    proxy.$toast.show(error.message || 'Failed to create NFT', 'error')
+  } finally {
     loading.hide()
+    // isSubmitting.value = false;
   }
 });
-
-onMounted(() => {
-  // initData()
-})
-const initData = async ()=>{
-  
-}
 </script>
