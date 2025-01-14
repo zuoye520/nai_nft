@@ -50,7 +50,7 @@
             </div>
           </div>
           <div v-if="rewardHistory.length === 0" class="text-center py-12">
-            <div class="text-gray-400">No Data found</div>
+            <div class="text-gray-400">No Data</div>
           </div>
         </div>
         

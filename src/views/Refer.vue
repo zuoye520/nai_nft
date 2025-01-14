@@ -62,7 +62,7 @@
               </div>
             </div>
             <div v-if="referStore.referralHistory.length === 0" class="text-center py-12">
-              <div class="text-gray-400">No Data Found</div>
+              <div class="text-gray-400">No Data</div>
             </div>
           </div>
         </BaseLocalLoading>

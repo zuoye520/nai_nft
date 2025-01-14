@@ -23,6 +23,9 @@
             <div class="text-sm text-gray-400">{{ holder.percentage }}%</div>
           </div>
         </div>
+        <div v-if="holders.length === 0" class="text-center py-12">
+          <div class="text-gray-400">No Data</div>
+        </div>
       </BaseLocalLoading>
     </div>
   </div>
