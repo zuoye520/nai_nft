@@ -10,9 +10,8 @@
           
           <div class="mt-4 text-4xl md:text-6xl font-bold animate-fade-in animation-delay-200">
             <GradientText type="secondary">NFT</GradientText>
-            <GradientText type="primary" class="ml-2">LIQUIDITY PROTOCOL</GradientText>
+            <GradientText type="primary" class="ml-2">LIQUIDITY PROTOCOL COMBINED WITH AI AGENT</GradientText>
           </div>
-          
           <p class="mt-8 text-xl text-gray-400 max-w-2xl mx-auto animate-fade-in animation-delay-400">
             Trade, earn and manage NFT liquidity with our revolutionary protocol
           </p>

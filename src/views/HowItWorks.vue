@@ -5,8 +5,10 @@
         <div class="text-center mb-16">
           <h1 class="text-4xl font-bold text-white mb-6">How It Works</h1>
           <p class="text-xl text-gray-300 leading-relaxed">
-            PumpNFT — the world's first NFT + DEFI liquidity protocol, transforms NFT transactions from the traditional floor price model to a simpler Swap model, and continuously injects liquidity into NFT through NULS consensus node income, so that liquidity is inexhaustible.
+            <!-- PumpNFT — the world's first NFT + DEFI liquidity protocol, transforms NFT transactions from the traditional floor price model to a simpler Swap model, and continuously injects liquidity into NFT through NULS consensus node income, so that liquidity is inexhaustible. -->
+            PumpNFT — the world’s first NFT liquidity protocol combined with AI Agent. 
           </p>
+          <p class="text-xl text-gray-300 leading-relaxed">It redefines NFT transactions by shifting from the traditional floor price model to a streamlined Swap model. By leveraging NULS staking rewards, it provides a continuous injection of liquidity, ensuring an inexhaustible and sustainable ecosystem for NFTs.</p>
         </div>
   
         <!-- For Deployers Section -->
@@ -71,14 +73,14 @@
           <h2 class="text-2xl font-bold text-white mb-6">For Users</h2>
           <div class="bg-gray-900/50 rounded-xl p-8 border border-gray-800">
             <p class="text-gray-300">
-              During the Mint phase, you can directly Mint your favorite NFTs and have a 100% chance to win the slot lucky bonus reward. After the Mint phase, you can trade NFTs on the SWAP page. If the transaction fee is 10% or higher, each transaction will also give you a chance to win the slot lucky bonus.
+              During the Mint phase, you can directly Mint your favorite NFTs and have a 100% chance to win the slot lucky bonus reward. After the Mint phase, you can trade NFTs on the Swap page. If the transaction fee is 10% or higher, each transaction will also give you a chance to win the slot lucky bonus.
             </p>
           </div>
         </div>
 
         <!-- For Users Section -->
         <div>
-          <h2 class="text-2xl font-bold text-white mb-6">For new users</h2>
+          <h2 class="text-2xl font-bold text-white mb-6">For the inviter</h2>
           <div class="bg-gray-900/50 rounded-xl p-8 border border-gray-800">
             <p class="text-gray-300">   
                 When your friends mint or trade NFTs, you will be rewarded and you will share 50% of the platform revenue as a reward.
