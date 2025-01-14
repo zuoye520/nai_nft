@@ -37,9 +37,12 @@
         </transition>
       </router-view>
     </div>
-
     <!-- Global Modal Layer -->
     <WalletModal />
+    <WalletInstallModal 
+      :show="walletStore.showWalletInstallModal"
+      @close="walletStore.toggleWalletInstallModal"
+    />
   </div>
 </template>
 
@@ -52,6 +55,10 @@ import ConnectWalletButton from './components/ConnectWalletButton.vue'
 import AnimatedBackground from './components/AnimatedBackground.vue'
 import GradientText from './components/GradientText.vue'
 import WalletModal from './components/wallet/WalletModal.vue'
+import WalletInstallModal from './components/wallet/WalletInstallModal.vue'
+
+import { useWalletStore } from './stores/wallet'
+const walletStore = useWalletStore()
 
 const urlParams = new URLSearchParams(window.location.search);
 const inviteCode = ref(urlParams.get("inviteCode"));

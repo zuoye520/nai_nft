@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref, inject, getCurrentInstance, onMounted, onUnmounted, onBeforeMount, onUpdated } from 'vue'
+import { ref, inject,computed, getCurrentInstance, onMounted, onUnmounted, onBeforeMount, onUpdated } from 'vue'
 import { useRoute } from 'vue-router'
 import NFTHeader from '../components/nft-details/NFTHeader.vue'
 import TabButton from '../components/nft-details/TabButton.vue'
@@ -46,8 +46,6 @@ import TradeTab from '../components/nft-details/tabs/TradeTab.vue'
 import TransactionsTab from '../components/nft-details/tabs/TransactionsTab.vue'
 import RepliesTab from '../components/nft-details/tabs/RepliesTab.vue'
 import HoldersTab from '../components/nft-details/tabs/HoldersTab.vue'
-// import { useNFTDetails } from '../composables/useNFTDetails'
-// const { nft, fetchNFTDetails } = useNFTDetails(route.params.id)
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '../stores/wallet'
 const walletStore = useWalletStore()
@@ -58,14 +56,32 @@ const route = useRoute()
 const loading = inject('loading')
 
 const activeTab = ref('info')
-const tabs = [
-  { id: 'info', name: 'Info' },
-  { id: 'chart', name: 'Chart' },
-  // { id: 'trade', name: nft.value.phase === 'mint' ? 'Mint' : 'Swap' },
-  { id: 'transactions', name: 'TXN' },
-  { id: 'replies', name: 'Reply' },
-  { id: 'holders', name: 'Holders' }
-]
+// const tabs = ref([
+//   { id: 'info', name: 'Info' },
+//   { id: 'chart', name: 'Chart' },
+//   { id: 'transactions', name: 'TXN' },
+//   { id: 'replies', name: 'Reply' },
+//   { id: 'holders', name: 'Holders' }
+// ])
+const tabs = computed(() => {
+  if(nft.value.projectState == 'Swap'){
+    return [
+      { id: 'info', name: 'Info' },
+      { id: 'chart', name: 'Chart' },
+      { id: 'transactions', name: 'TXN' },
+      { id: 'replies', name: 'Reply' },
+      { id: 'holders', name: 'Holders' }
+    ]
+  }else{
+    return [
+      { id: 'info', name: 'Info' },
+      { id: 'transactions', name: 'TXN' },
+      { id: 'replies', name: 'Reply' },
+      { id: 'holders', name: 'Holders' }
+    ]
+  }
+  
+})
 
 const isLoading = ref(false); //局部loading
 const handleActiveTab = async (id)=>{
@@ -78,7 +94,7 @@ const handleActiveTab = async (id)=>{
   }else if(id == 'transactions'){
     await nftStore.getNftTxn({id:route.params.id})
   }else if(id == 'chart'){
-    // await nftStore.getNftPrice(route.params.id)
+    await nftStore.getNftPrice(route.params.id)
   }
   isLoading.value = false
 }

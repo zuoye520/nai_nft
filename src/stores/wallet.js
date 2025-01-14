@@ -21,6 +21,13 @@ export const useWalletStore = defineStore('wallet', () => {
   const nulsBalance = ref(0)
   const nulsUsdPrice = ref(0)
 
+  //安装钱包提示
+  const showWalletInstallModal = ref(false)
+
+  function toggleWalletInstallModal() {
+    showWalletInstallModal.value = !showWalletInstallModal.value
+  }
+
   //钱包弹层
   const showWalletModal = ref(false)
   function toggleWalletModal() {
@@ -41,7 +48,9 @@ export const useWalletStore = defineStore('wallet', () => {
   async function connect() {
     if (!walletService.isNaboxInstalled()) {
       error.value = 'Please install NABOX wallet'
+      console.log('Please install NABOX wallet')
       // window.open(NABOX_DOWNLOAD_URL, '_blank')
+      toggleWalletInstallModal() // 显示安装弹层
       return;
     }
     try {
@@ -274,6 +283,8 @@ export const useWalletStore = defineStore('wallet', () => {
     uploadFile,
     getFile,
     showWalletModal,
-    toggleWalletModal
+    toggleWalletModal,
+    showWalletInstallModal,
+    toggleWalletInstallModal
   }
 })

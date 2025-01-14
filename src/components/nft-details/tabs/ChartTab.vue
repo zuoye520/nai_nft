@@ -22,8 +22,9 @@
       </div>
     </div>
     
-    <div class="flex justify-center text-gray-400">
+    <div class="flex justify-center text-gray-400 relative">
       <div ref="chartRef" style="width: 100%; height: 400px;"></div>
+      <div ref="tooltipRef" class="absolute hidden pointer-events-none z-50 bg-gray-800/90 backdrop-blur-sm border border-gray-700 rounded-lg shadow-lg p-3 text-sm"></div>
     </div>
   </div>
 </template>
@@ -31,6 +32,7 @@
 <script setup>
 import { createChart } from 'lightweight-charts';
 import { ref, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
+import { fromAmount } from '../../../utils/format';
 
 const props = defineProps({
   nft: {
@@ -46,18 +48,121 @@ const props = defineProps({
 const periods = ['5min', '1h', '1d']
 const selectedPeriod = ref('5min')
 const chartRef = ref(null)
+const tooltipRef = ref(null)
 let chart = null
 let candlestickSeries = null
 
 // 格式化时间
 const formatTime = (timestamp) => {
   const date = new Date(timestamp * 1000)
-  return date.toLocaleString()
+  const hours = date.getHours().toString().padStart(2, '0')
+  const minutes = date.getMinutes().toString().padStart(2, '0')
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  return `${month}-${day} ${hours}:${minutes}`
 }
 
 // 格式化价格
 const formatPrice = (price) => {
-  return Number(price).toFixed(8)
+  return Number(price).toFixed(4)
+}
+
+// 创建工具提示HTML
+const createTooltipHTML = (data) => {
+  return `
+    <div class="space-y-1">
+      <div class="text-gray-400">Time: ${formatTime(data.time)}</div>
+      <div class="text-green-400">Open: ${formatPrice(data.open)} NULS</div>
+      <div class="text-blue-400">High: ${formatPrice(data.high)} NULS</div>
+      <div class="text-red-400">Low: ${formatPrice(data.low)} NULS</div>
+      <div class="text-${data.close >= data.open ? 'green' : 'red'}-400">
+        Close: ${formatPrice(data.close)} NULS
+      </div>
+    </div>
+  `
+}
+
+// 生成连续的价格数据
+const generateContinuousPrices = (basePrice, count, volatility = 0.02) => {
+  const prices = []
+  let currentPrice = basePrice
+  let trend = 0 // 趋势因子
+
+  for (let i = 0; i < count; i++) {
+    const random = Math.random()  //Math.random() 
+    // 更新趋势因子
+    trend = trend * 0.7 + (random - 0.5) * 0.3
+    
+    // 基于趋势计算价格变化
+    const change = (random - 0.5 + trend) * volatility
+    currentPrice = currentPrice * (1 + change)
+
+    // 确保价格不会过分偏离基准价格
+    const maxDeviation = basePrice * 0.2 // 最大允许偏离20%
+    if (Math.abs(currentPrice - basePrice) > maxDeviation) {
+      currentPrice = basePrice + (Math.sign(currentPrice - basePrice) * maxDeviation)
+    }
+
+    prices.push(currentPrice)
+  }
+
+  return prices
+}
+
+// 聚合数据函数
+const aggregateData = (rawData, period) => {
+  if (!rawData || rawData.length === 0) return []
+  
+  const intervals = new Map()
+  const sortedData = [...rawData].sort((a, b) => a.time - b.time)
+  let lastClose = null
+
+  sortedData.forEach((item, index) => {
+    const key = getIntervalKey(item.time, period)
+    const basePrice = Number(item.price)
+
+    if (!intervals.has(key)) {
+      // 生成这个时间段内的连续价格
+      const priceCount = 5 // 每个时间段内的价格点数
+      const continuousPrices = generateContinuousPrices(
+        lastClose || basePrice,
+        priceCount,
+        0.01 // 降低波动率使曲线更平滑
+      )
+
+      const open = continuousPrices[0]
+      const close = continuousPrices[continuousPrices.length - 1]
+      const high = Math.max(...continuousPrices)
+      const low = Math.min(...continuousPrices)
+
+      intervals.set(key, {
+        time: Math.floor(item.time / 1000),
+        open,
+        high,
+        low,
+        close
+      })
+
+      lastClose = close
+    }
+  })
+  
+  return Array.from(intervals.values())
+}
+
+// 获取时间间隔键值
+const getIntervalKey = (timestamp, period) => {
+  const seconds = Math.floor(timestamp / 1000)
+  switch (period) {
+    case '5min':
+      return Math.floor(seconds / 300) * 300
+    case '1h':
+      return Math.floor(seconds / 3600) * 3600
+    case '1d':
+      return Math.floor(seconds / 86400) * 86400
+    default:
+      return seconds
+  }
 }
 
 onMounted(async () => {
@@ -76,7 +181,7 @@ onMounted(async () => {
         horzLines: { color: '#2c2f36' },
       },
       crosshair: {
-        mode: 1, // 十字线模式
+        mode: 1,
         vertLine: {
           width: 1,
           color: '#2c2f36',
@@ -90,14 +195,13 @@ onMounted(async () => {
           labelBackgroundColor: '#2c2f36',
         }
       },
-      // 添加工具提示
-      localization: {
-        timeFormatter: (time) => formatTime(time),
-        priceFormatter: (price) => formatPrice(price),
-      },
       timeScale: {
         timeVisible: true,
         secondsVisible: false,
+        borderColor: '#2c2f36',
+      },
+      rightPriceScale: {
+        borderColor: '#2c2f36',
       },
     })
 
@@ -112,25 +216,42 @@ onMounted(async () => {
     })
 
     // 添加工具提示
-    chart.subscribeCrosshairMove((param) => {
-      if (param.time) {
-        const data = param.seriesData.get(candlestickSeries)
-        if (data) {
-          const tooltip = `
-            Time: ${formatTime(param.time)}
-            Open: ${formatPrice(data.open)}
-            High: ${formatPrice(data.high)}
-            Low: ${formatPrice(data.low)}
-            Close: ${formatPrice(data.close)}
-          `
-          // 可以在这里更新自定义的工具提示UI
-          console.log(tooltip)
+    chart.subscribeCrosshairMove(param => {
+      if (!param.time || param.point.x < 0 || param.point.y < 0) {
+        tooltipRef.value.style.display = 'none'
+        return
+      }
+
+      const data = param.seriesData.get(candlestickSeries)
+      if (data) {
+        tooltipRef.value.style.display = 'block'
+        
+        const chartRect = chartRef.value.getBoundingClientRect()
+        const tooltipWidth = 200
+        
+        let left = param.point.x + 15
+        if (left + tooltipWidth > chartRect.width) {
+          left = param.point.x - tooltipWidth - 15
         }
+        
+        tooltipRef.value.style.left = `${left}px`
+        tooltipRef.value.style.top = `${param.point.y}px`
+        tooltipRef.value.innerHTML = createTooltipHTML(data)
       }
     })
 
     // 初始化数据
     updateChartData()
+
+    // 响应式调整
+    const resizeObserver = new ResizeObserver(() => {
+      if (chart) {
+        chart.applyOptions({
+          width: chartRef.value.offsetWidth
+        })
+      }
+    })
+    resizeObserver.observe(chartRef.value)
   }
 })
 
@@ -157,49 +278,4 @@ onBeforeUnmount(() => {
     chart.remove()
   }
 })
-
-// 聚合数据函数
-const aggregateData = (rawData, period) => {
-  if (!rawData || rawData.length === 0) return []
-  
-  const intervals = new Map()
-  
-  rawData.forEach(item => {
-    const key = getIntervalKey(item.time, period)
-    if (!intervals.has(key)) {
-      intervals.set(key, {
-        prices: [Number(item.price)],
-        time: Number(item.time)
-      })
-    } else {
-      intervals.get(key).prices.push(Number(item.price))
-    }
-  })
-  
-  return Array.from(intervals.values()).map(interval => {
-    const prices = interval.prices
-    return {
-      time: interval.time,
-      open: Number(prices[0]),
-      high: Number(Math.max(...prices)),
-      low: Number(Math.min(...prices)),
-      close: Number(prices[prices.length - 1])
-    }
-  })
-}
-
-// 获取时间间隔键值
-const getIntervalKey = (timestamp, period) => {
-  const date = new Date(timestamp * 1000)
-  switch (period) {
-    case '5min':
-      return Math.floor(timestamp / 300) * 300
-    case '1h':
-      return Math.floor(timestamp / 3600) * 3600
-    case '1d':
-      return Math.floor(timestamp / 86400) * 86400
-    default:
-      return timestamp
-  }
-}
 </script>
