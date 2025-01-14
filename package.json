@@ -25,6 +25,7 @@
     "pinata-web3": "^0.5.2",
     "pinia": "^2.1.6",
     "postcss": "^8.4.29",
+    "serve": "^14.2.4",
     "tailwindcss": "^3.3.3",
     "three": "^0.155.0",
     "vee-validate": "^4.12.4",
