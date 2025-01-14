@@ -50,7 +50,7 @@
     <!-- Submit Button -->
     <div class="pt-6">
       <BaseButton v-if="account" type="submit" primary class="w-full" :disabled="isSubmitting || Object.keys(errors).length > 0">
-        {{ isSubmitting ? 'Creating...' : 'Create Collection' }}
+        Create Collection
       </BaseButton>
       <BaseButton v-else primary class="w-full" @click="walletStore.connect" :disabled="isSubmitting">
         Connect
