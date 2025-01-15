@@ -153,6 +153,7 @@ class WalletService {
 
       const accountAddress = address || this.session[0]
       const url = `${CHAINS[this.chainId].rpc}/api/accountledger/balance/${accountAddress}`
+      
       const data = {
         assetChainId: this.chainId,
         assetId: 1

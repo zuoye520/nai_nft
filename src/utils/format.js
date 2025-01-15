@@ -91,23 +91,23 @@ export const formatUsd = (amount) => {
  * @param {number|string} num 数字
  * @returns {string} 缩写后的数字
  */
-export const formatLargeNumber = (num) => {
+export const formatLargeNumber = (num,decimals=2) => {
   if (!num) return '0'
   
   const n = parseFloat(num)
   if (isNaN(n)) return '0'
   
   if (n >= 1e9) {
-    return (n / 1e9).toFixed(2) + 'B'
+    return (n / 1e9).toFixed(decimals) + 'B'
   }
   if (n >= 1e6) {
-    return (n / 1e6).toFixed(2) + 'M'
+    return (n / 1e6).toFixed(decimals) + 'M'
   }
   if (n >= 1e3) {
-    return (n / 1e3).toFixed(2) + 'K'
+    return (n / 1e3).toFixed(decimals) + 'K'
   }
   
-  return n.toString()
+  return (n*1).toFixed(2)
 }
 /**
  * 隐藏部分地址

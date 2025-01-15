@@ -99,7 +99,7 @@
               <span class="text-white">{{ nft.mintPrice }} NULS</span>
             </div>
             <div v-if="account" class="flex justify-between text-sm font-medium">
-              <span class="text-gray-400">Available balance</span>
+              <span class="text-gray-400">Available Balance</span>
               <span class="text-green-400">{{$format.fromAmount( walletStore.nulsBalance) }} NULS</span>
             </div>
             <div class="flex justify-between text-sm font-medium">
@@ -187,7 +187,7 @@
                 <span class="text-white">{{ getFeePercentage }}%</span>
               </div>
               <div v-if="account" class="flex justify-between text-sm font-medium">
-                <span class="text-gray-400">Available balance</span>
+                <span class="text-gray-400">Available Balance</span>
                 <span  class="text-green-400">{{ tradeType === 'buy' ? `${$format.fromAmount( walletStore.nulsBalance)} NULS`: `${nftStore.listTotal} NFT`}} </span>
               </div>
               <div class="flex justify-between text-sm font-medium">

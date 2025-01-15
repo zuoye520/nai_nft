@@ -89,14 +89,21 @@ provide('loading', {
 // })
 // Toast setup
 const toastRef = ref(null)
-
+let intervalId = null;
 onMounted(() => {
   // Set global toast instance
   setToastInstance(toastRef.value)
   //缓存邀请码
   localStorage.setItem('inviteCode',inviteCode.value)
+  initData()
 })
-
+const initData = ()=>{
+   walletStore.getNulsUsdPrice()
+   intervalId = setInterval(() => {
+    //NULS价格获取
+    walletStore.getNulsUsdPrice()
+  }, 10000);//10秒执行一次
+}
 
 </script>
 

@@ -33,6 +33,8 @@
 import { createChart } from 'lightweight-charts';
 import { ref, onMounted, nextTick, onBeforeUnmount, watch } from 'vue';
 import { fromAmount } from '../../../utils/format';
+import { useNftStore } from '../../../stores/nft'
+const nftStore = useNftStore()
 
 const props = defineProps({
   nft: {
@@ -51,7 +53,7 @@ const chartRef = ref(null)
 const tooltipRef = ref(null)
 let chart = null
 let candlestickSeries = null
-
+let intervalId = null
 // 格式化时间
 const formatTime = (timestamp) => {
   const date = new Date(timestamp * 1000)
@@ -82,91 +84,16 @@ const createTooltipHTML = (data) => {
   `
 }
 
-// 生成连续的价格数据
-const generateContinuousPrices = (basePrice, count, volatility = 0.02) => {
-  const prices = []
-  let currentPrice = basePrice
-  let trend = 0 // 趋势因子
-
-  for (let i = 0; i < count; i++) {
-    const random = Math.random()  //Math.random() 
-    // 更新趋势因子
-    trend = trend * 0.7 + (random - 0.5) * 0.3
-    
-    // 基于趋势计算价格变化
-    const change = (random - 0.5 + trend) * volatility
-    currentPrice = currentPrice * (1 + change)
-
-    // 确保价格不会过分偏离基准价格
-    const maxDeviation = basePrice * 0.2 // 最大允许偏离20%
-    if (Math.abs(currentPrice - basePrice) > maxDeviation) {
-      currentPrice = basePrice + (Math.sign(currentPrice - basePrice) * maxDeviation)
-    }
-
-    prices.push(currentPrice)
-  }
-
-  return prices
-}
-
-// 聚合数据函数
-const aggregateData = (rawData, period) => {
-  if (!rawData || rawData.length === 0) return []
-  
-  const intervals = new Map()
-  const sortedData = [...rawData].sort((a, b) => a.time - b.time)
-  let lastClose = null
-
-  sortedData.forEach((item, index) => {
-    const key = getIntervalKey(item.time, period)
-    const basePrice = Number(item.price)
-
-    if (!intervals.has(key)) {
-      // 生成这个时间段内的连续价格
-      const priceCount = 5 // 每个时间段内的价格点数
-      const continuousPrices = generateContinuousPrices(
-        lastClose || basePrice,
-        priceCount,
-        0.01 // 降低波动率使曲线更平滑
-      )
-
-      const open = continuousPrices[0]
-      const close = continuousPrices[continuousPrices.length - 1]
-      const high = Math.max(...continuousPrices)
-      const low = Math.min(...continuousPrices)
-
-      intervals.set(key, {
-        time: Math.floor(item.time / 1000),
-        open,
-        high,
-        low,
-        close
-      })
-
-      lastClose = close
-    }
-  })
-  
-  return Array.from(intervals.values())
-}
-
-// 获取时间间隔键值
-const getIntervalKey = (timestamp, period) => {
-  const seconds = Math.floor(timestamp / 1000)
-  switch (period) {
-    case '5min':
-      return Math.floor(seconds / 300) * 300
-    case '1h':
-      return Math.floor(seconds / 3600) * 3600
-    case '1d':
-      return Math.floor(seconds / 86400) * 86400
-    default:
-      return seconds
-  }
+const initData = ()=>{
+   //定时获取价格数据
+  intervalId = setInterval(() => {
+    nftStore.getNftPrice(props.nft.id)
+  }, 10000);//10秒执行一次
 }
 
 onMounted(async () => {
   await nextTick()
+  
   if (chartRef.value) {
     // 创建图表
     chart = createChart(chartRef.value, {
@@ -239,37 +166,84 @@ onMounted(async () => {
         tooltipRef.value.innerHTML = createTooltipHTML(data)
       }
     })
-
     // 初始化数据
     updateChartData()
-
     // 响应式调整
     const resizeObserver = new ResizeObserver(() => {
-      if (chart) {
+      if (chart && chartRef.value) {
         chart.applyOptions({
           width: chartRef.value.offsetWidth
         })
       }
     })
     resizeObserver.observe(chartRef.value)
+    //定时获取数据
+    initData()
   }
 })
 
-// 更新图表数据
-const updateChartData = () => {
-  if (candlestickSeries) {
-    const aggregatedData = aggregateData(props.prices, selectedPeriod.value)
-    candlestickSeries.setData(aggregatedData)
+// 获取时间间隔键值
+const getIntervalKey = () => {
+  switch (selectedPeriod.value) {
+    case '5min':
+      return 5*60
+    case '1h':
+      return 60*60
+    case '1d':
+      return 60*60*24
   }
 }
+/**
+ * 生成K线数据
+ * @param interval 时间周期 1分钟/1小时/1天
+ */
+ const generateCandlestickData = () => {
+  const interval = getIntervalKey()
+  const rawData = props.prices.map((item) => ({
+    time: Math.floor(item.time / 1000), // 转换为秒级时间戳
+    price: Number(item.price), // 转换为数字类型
+  }));
 
+  // 按时间间隔分组
+  const groupedData = [];
+  let currentGroup = null;
+
+  rawData.forEach((item,index) => {
+    const groupTime = Math.floor(item.time / interval) * interval; // 按时间分组
+    
+    if (!currentGroup || currentGroup.time !== groupTime) {
+      if (currentGroup) groupedData.push(currentGroup);
+      currentGroup = {
+        time: groupTime,
+        open: item.price,
+        high: item.price,
+        low: item.price,
+        close: item.price,
+        price:item.price
+      };
+    } else {
+      currentGroup.high = Math.max(currentGroup.high, item.price);
+      currentGroup.low = Math.min(currentGroup.low, item.price);
+      currentGroup.close = item.price;
+    }
+  });
+  if (currentGroup) groupedData.push(currentGroup); // 添加最后一组
+
+  return groupedData;
+};
+
+// 更新图表数据
+const updateChartData = () => {
+  const data = generateCandlestickData()
+  candlestickSeries.setData(data)
+}
 // 监听周期变化
 watch(selectedPeriod, () => {
   updateChartData()
 })
-
 // 监听价格数据变化
 watch(() => props.prices, () => {
+  // console.log('watch prices:',props.prices)
   updateChartData()
 }, { deep: true })
 
@@ -277,5 +251,10 @@ onBeforeUnmount(() => {
   if (chart) {
     chart.remove()
   }
+  if(intervalId){
+    clearInterval(intervalId);
+  }
+  
 })
+
 </script>

@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as api from '../services/api'
 import {fromAmount,formatUsd} from '../utils/format'
-import { IPFS_GATEWAY } from '../config'
+import { IPFS_GATEWAY,DEFAULT_AVATAR } from '../config'
 export const useNftStore = defineStore('nft', () => {
   // NFT列表数据 Mock
   const nfts = ref([
@@ -137,7 +137,7 @@ export const useNftStore = defineStore('nft', () => {
     {
       id: 1,
       author: 'User1',
-      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=12',
+      avatar: DEFAULT_AVATAR,
       content: 'Great NFT collection!',
       timestamp: Date.now() - 3600000,
       likes: 5
@@ -260,7 +260,7 @@ export const useNftStore = defineStore('nft', () => {
       item.balance = item.nftHoldings
       item.percentage = item.nftHoldingRatio
       item.joinDate = item.createdDate
-      item.avatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=12'
+      item.avatar = DEFAULT_AVATAR
       return item
     })
     nftHolders.value = list;
@@ -271,7 +271,7 @@ export const useNftStore = defineStore('nft', () => {
     const list = result.list.map((item)=>{
       item.author = item.userAddress
       item.timestamp = item.createdDate
-      item.avatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=12'
+      item.avatar = DEFAULT_AVATAR
       return item
     })
     repliesTotal.value = result.totalCount

@@ -108,7 +108,9 @@ onMounted(() => {
 const initData = async ()=>{
   loading.show('Loading ...')
   await nftStore.getNFTInfo(route.params.id)
-  await walletStore.getBalance()
+  if(walletStore.account){
+    await walletStore.getBalance()
+  }
   loading.hide()
 }
 </script>

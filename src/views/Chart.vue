@@ -1,6 +1,11 @@
 <template>
+  <div>
+    <button class="p-5" @click="selectedPeriod(5*60)">5min</button>
+    <button class="p-5" @click="selectedPeriod(60*60)">1h</button>
+    <button class="p-5" @click="selectedPeriod(60*60*24)">1d</button>
+  </div>
   <div v-show="isChartVisible">
-    <div ref="chartRef" style="width: 800px; height: 500px;"></div>
+    <div ref="chartRef" style="width: 1000px; height: 500px;"></div>
   </div>
 </template>
 
@@ -11,8 +16,40 @@ import { ref, onMounted, nextTick, onBeforeUnmount } from 'vue';
 const chartRef = ref(null); // 绑定 DOM 元素
 const isChartVisible = ref(true); // 控制容器显示
 let chart = null; // 保存图表实例
-
+let candlestickSeries = null
+const prices = ref([
+        {
+            "time": 1736596801737,
+            "price": "1185185185"
+        },
+        {
+            "time": 1736604360505,
+            "price": "1500000000"
+        },
+        {
+            "time": 1736604382604,
+            "price": "1185185185"
+        },
+        {
+            "time": 1736738636245,
+            "price": "1500000000"
+        },
+        {
+            "time": 1736768943976,
+            "price": "1185185185"
+        },
+        {
+            "time": 1736869509754,
+            "price": "1500000000"
+        },
+        {
+            "time": 1736869549863,
+            "price": "10666666669"
+        }
+    ])
 onMounted(async () => {
+  
+
   await nextTick(); // 确保 DOM 完全渲染
   if (chartRef.value) {
     chart = createChart(chartRef.value, {
@@ -34,7 +71,7 @@ onMounted(async () => {
         mode: 0, // 设置光标交互样式
       },
     });
-    const candlestickSeries = chart.addCandlestickSeries({
+    candlestickSeries = chart.addCandlestickSeries({
       upColor: '#4caf50', // 阳线颜色
       downColor: '#f44336', // 阴线颜色
       borderUpColor: '#4caf50',
@@ -43,11 +80,8 @@ onMounted(async () => {
       wickDownColor: '#f44336',
     });
     
-    // 生成 1 天的 K 线数据
-    const data = generateCandlestickData('2023-01-01', 30);
-    console.log(data);
+    generateCandlestickData(60);
     
-    candlestickSeries.setData(data);
   } else {
     console.error('chartRef is null!'); // 如果 chartRef 仍为 null
   }
@@ -59,33 +93,51 @@ onBeforeUnmount(() => {
   }
 });
 
-function generateCandlestickData(startDate, days) {
-  const data = [];
-  let lastClose = 1.0; // 初始收盘价
-  const date = new Date(startDate);
 
-  for (let i = 0; i < days; i++) {
-    const open = lastClose;
-    const high = +(open + Math.random() * 0.2).toFixed(2); // 随机高价
-    const low = +(open - Math.random() * 0.2).toFixed(2);  // 随机低价
-    const close = +(low + Math.random() * (high - low)).toFixed(2); // 随机收盘价
+/**
+ * 生成K线数据
+ * @param interval 时间周期 1分钟/1小时/1天
+ */
+ const generateCandlestickData = (interval = 5*60) => {
+  const rawData = prices.value.map((item) => ({
+    time: Math.floor(item.time / 1000), // 转换为秒级时间戳
+    price: Number(item.price/1e8), // 转换为数字类型
+  }));
 
-    // 生成时间戳 (一天的开始时间戳)
-    const timestamp = Math.floor(date.getTime() / 1000); // 转换为 Unix 时间戳（秒）
+  // 按时间间隔分组
+  const groupedData = [];
+  let currentGroup = null;
+
+  rawData.forEach((item,index) => {
+    const groupTime = Math.floor(item.time / interval) * interval; // 按时间分组
     
-    data.push({
-      time: timestamp, // 使用时间戳
-      open,
-      high,
-      low,
-      close,
-    });
+    if (!currentGroup || currentGroup.time !== groupTime) {
+      if (currentGroup) groupedData.push(currentGroup);
+      currentGroup = {
+        time: groupTime,
+        open: item.price,
+        high: item.price,
+        low: item.price,
+        close: item.price,
+        price:item.price
+      };
+    } else {
+      currentGroup.high = Math.max(currentGroup.high, item.price);
+      currentGroup.low = Math.min(currentGroup.low, item.price);
+      currentGroup.close = item.price;
+    }
+    console.log(index,'===>',item.price,{groupTime,currentGroup:currentGroup.time})
+  });
+  if (currentGroup) groupedData.push(currentGroup); // 添加最后一组
 
-    // 更新日期和最后的收盘价
-    lastClose = close;
-    date.setDate(date.getDate() + 1);
-  }
+  console.log('groupedData:',groupedData)
+  // 更新图表数据
+  candlestickSeries.setData(groupedData);
+};
 
-  return data;
-}
+const selectedPeriod = (interval) => {
+  generateCandlestickData(interval); // 切换时间间隔时重新生成数据
+};
+
+
 </script>

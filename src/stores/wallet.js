@@ -114,11 +114,11 @@ export const useWalletStore = defineStore('wallet', () => {
     nulsBalance.value = balance
     return balance
   }
-  // async function getNulsUsdPrice(){
-  //   const nulsUsd = await api.nulsUsd();
-  //   nulsUsdPrice.value = nulsUsd
-  //   return nulsUsd
-  // }
+  async function getNulsUsdPrice(){
+    const nulsUsd = await api.nulsUsd();
+    nulsUsdPrice.value = nulsUsd
+    return nulsUsd
+  }
 
   function setupEventListeners() {
     walletService.onAccountsChanged((accounts) => {
@@ -277,6 +277,7 @@ export const useWalletStore = defineStore('wallet', () => {
     contractCall,
     currentChainConfig,
     nulsBalance,
+    getNulsUsdPrice,
     getBalance,
     nulsUsdPrice,
     uploadJson,

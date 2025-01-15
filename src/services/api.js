@@ -14,11 +14,12 @@ const pinata = new PinataSDK({
  */
 export const nulsUsd = async (symbol= 'NULSUSDT')=>{
   try {
-    const url = `${BINANCE_URL}/api/v3/avgPrice?symbol=${symbol}`;
+    // const url = `${BINANCE_URL}/api/v3/avgPrice?symbol=${symbol}`;
+    const url =`https://assets.nabox.io/api/price/NULS`
     const response = await sendRequest(url, { method: 'get' });
-    if(!response.price) throw response
-    console.log('nulsUsd:',response.price)
-    return response.price;
+    if(!response) throw response
+    // console.log('nulsUsd:',response)
+    return response;
   } catch (error) {
     console.error('nulsUsd:', error);
     return 0;
@@ -289,4 +290,12 @@ export const nftReply = async (params= {})=>{
   console.log('nftReply result:',{data,response})
   if(!response || response.code !=0) throw response
   return response.data;
+}
+
+export const mockPrice = async ()=>{
+  const data = {}
+  const url = `https://api.tiptag.social/community/getTokenTradeData?tick=Slime&isNew=true`;
+  const response = await sendRequest(url, { data, method: 'get' });
+  // console.log('mockPrice result:',{data,response})
+  return response;
 }

@@ -5,8 +5,8 @@
       <div class="space-y-4">
         <InfoRow label="Collection Name" :value="nft.name" />
         <InfoRow label="Total Supply" :value="nft.totalSupply" />
-        <InfoRow label="Market cap" :value="`${nft.marketValue} NULS`" />
-        <InfoRow label="Mint Price" :value="`${nft.mintPrice} NULS`" />
+        <InfoRow label="Market cap" :value="marketCap()" />
+        <InfoRow label="Mint Price" :value="`${nft.mintPrice}NULS`" />
         <InfoRow label="Mint Percent" :value="`${nft.mintPercent}%`" />
         <InfoRow label="Buy Fee" :value="`${nft.buyFee}%`" />
         <InfoRow label="Sell Fee" :value="`${nft.sellFee}%`" />
@@ -30,13 +30,25 @@
 </template>
 
 <script setup>
+import { ref, getCurrentInstance } from 'vue'
+import { useWalletStore } from '../../../stores/wallet'
+const walletStore = useWalletStore()
+const { proxy } = getCurrentInstance()
 import InfoRow from '../InfoRow.vue'
 import SocialLink from '../SocialLink.vue'
 
-defineProps({
+const props =defineProps({
   nft: {
     type: Object,
     required: true
   }
 })
+const marketCap = () => {
+  let usd = proxy.$format.formatLargeNumber(props.nft.marketValue * walletStore.nulsUsdPrice)
+  usd = usd*1 > 0 ?` ≈ $${usd} `: ''
+  return `${props.nft.marketValue}NULS${usd}`
+}
+
+
+
 </script>
