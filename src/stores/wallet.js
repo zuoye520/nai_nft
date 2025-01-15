@@ -72,28 +72,9 @@ export const useWalletStore = defineStore('wallet', () => {
       setupEventListeners()
       // 检查网络状态
       await checkNetwork()
-      //获取nonce值
-      const nonce = await authStore.loginNonce(accountAddress)
-      console.log('nonce:',nonce)
-      //开始签名
-      const signData = await walletService.nabox.signMessage([nonce, accountAddress])
-      console.log('signData:',signData)
-      console.log('login data:',{
-        "address": accountAddress,
-        "pubKey": accountPub.value,
-        "nonce": nonce,
-        "signData": signData,
-        "inviteCode": ""
-      })
-      const user = await authStore.login({
-        "address": accountAddress,
-        "pubKey": accountPub.value,
-        "nonce": nonce,
-        "signData": signData,
-        "inviteCode": localStorage.getItem('inviteCode') || ''
-      })
-      console.log('user:',user)
-      sessionStorage.setItem("userInfo", JSON.stringify(user));
+      //签名登录
+      await signLogin(accountAddress)
+
       account.value = accountAddress
       // await authStore.userInfo()
       //获取账户余额
@@ -107,6 +88,37 @@ export const useWalletStore = defineStore('wallet', () => {
     } finally {
       isConnecting.value = false
     }
+  }
+  
+  async function signLogin(accountAddress) {
+    let userInfo = sessionStorage.getItem("userInfo");
+    if(userInfo) {
+      userInfo = JSON.parse(userInfo);
+      if(userInfo.address == accountAddress){
+        //验证token 是否过期
+        const validate = await authStore.validate({
+          address:accountAddress,
+          token:userInfo.token
+        })
+        if(validate) return true;
+      }
+    }
+    //获取nonce值
+    const nonce = await authStore.loginNonce(accountAddress)
+    console.log('nonce:',nonce)
+    //开始签名
+    const signData = await walletService.nabox.signMessage([nonce, accountAddress])
+    console.log('signData:',signData)
+    userInfo = await authStore.login({
+      "address": accountAddress,
+      "pubKey": accountPub.value,
+      "nonce": nonce,
+      "signData": signData,
+      "inviteCode": localStorage.getItem('inviteCode') || ''
+    })
+    console.log('userInfo:',userInfo)
+    sessionStorage.setItem("userInfo", JSON.stringify(userInfo));
+    return true;
   }
 
   async function getBalance(){
@@ -122,10 +134,11 @@ export const useWalletStore = defineStore('wallet', () => {
 
   function setupEventListeners() {
     walletService.onAccountsChanged((accounts) => {
-      account.value = accounts[0] || null
-      if (!accounts[0]) {
-        disconnect()
-      }
+      window.location.reload();
+      // account.value = accounts[0] || null
+      // if (!accounts[0]) {
+      //   disconnect()
+      // }
     })
 
     walletService.onChainChanged(async () => {
@@ -237,17 +250,7 @@ export const useWalletStore = defineStore('wallet', () => {
           console.log('walletInfo:',{...chainInfo.value,...{currentAccount:account.value,accountPub:accountPub.value}});
           await checkNetwork()
           setupEventListeners()
-          //定时拉取数据,退出钱包需要清除定时任务
-          // intervalId.value = setInterval(() => {
-          //   getBalance()
-          //   getNulsUsdPrice()
-          //   loadRewards()
-          // }, 5000);
-          // loadDomains()
-          // setInterval(getBalance,5000)
-          // setInterval(getNulsUsdPrice,5000)
-          // setInterval(loadRewards,5000)
-          // setInterval(loadDomains,5000)
+          
         }
       } catch (err) {
         console.warn('Wallet initialization failed:', err)

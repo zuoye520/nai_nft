@@ -54,8 +54,11 @@
             <div v-for="(referral, index) in referStore.referralHistory" :key="index" 
               class="flex justify-between items-start py-4 border-b border-gray-800 last:border-0">
               <div>
-                <div class="text-white mb-1">{{ referral.user }}</div>
-                <div class="text-sm text-gray-400">{{ referral.date }}</div>
+                <div class="text-white mb-1">
+                  
+                  <router-link :to="`/profile/${referral.user}`">{{  $format.shortenAddress(referral.user)}}</router-link>
+                </div>
+                <div class="text-sm text-gray-400">{{ $format.formatDate(referral.date) }}</div>
               </div>
               <div class="text-green-400 font-medium">
                 +{{ referral.reward }} NULS

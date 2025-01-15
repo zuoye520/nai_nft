@@ -9,6 +9,11 @@ export const useAuthStore = defineStore('auth', () => {
     const nonce = await api.loginNonce({address})
     return nonce;
   }
+  //验证token
+  async function validate(params) {
+    const resutl = await api.tokenValidate(params)
+    return resutl
+  }
   //登录
   async function login(params) {
     const userInfo = await api.login(params)
@@ -33,6 +38,7 @@ export const useAuthStore = defineStore('auth', () => {
     isLoggedIn,
     loginNonce,
     login,
+    validate,
     userInfo,
     logout
   }

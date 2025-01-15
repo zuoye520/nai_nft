@@ -73,6 +73,23 @@ export const loginNonce = async (params= {})=>{
 }
 
 /**
+ * NFT API -- 检测token是否有效
+ * @param {*} params 
+ * @returns 
+ */
+export const tokenValidate = async (params= {})=>{
+  const  data = {
+    address:params.address,
+    token:params.token
+  };
+  const url = `${API_URL}/login/token/validate`;
+  const response = await sendRequest(url, { data, method: 'post' });
+  console.log('login result:',{data,response})
+  if(!response || response.code !=0) throw response
+  return response.data;
+}
+
+/**
  * NFT API -- 登录
  * @param {*} params 
  * @returns 

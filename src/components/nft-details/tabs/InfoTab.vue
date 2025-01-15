@@ -5,8 +5,8 @@
       <div class="space-y-4">
         <InfoRow label="Collection Name" :value="nft.name" />
         <InfoRow label="Total Supply" :value="nft.totalSupply" />
-        <InfoRow label="Market cap" :value="marketCap()" />
-        <InfoRow label="Mint Price" :value="`${nft.mintPrice}NULS`" />
+        <InfoRow label="Market Cap" :value="marketCap()" />
+        <InfoRow label="Mint Price" :value="`${nft.mintPrice} NULS`" />
         <InfoRow label="Mint Percent" :value="`${nft.mintPercent}%`" />
         <InfoRow label="Buy Fee" :value="`${nft.buyFee}%`" />
         <InfoRow label="Sell Fee" :value="`${nft.sellFee}%`" />
@@ -46,7 +46,7 @@ const props =defineProps({
 const marketCap = () => {
   let usd = proxy.$format.formatLargeNumber(props.nft.marketValue * walletStore.nulsUsdPrice)
   usd = usd*1 > 0 ?` ≈ $${usd} `: ''
-  return `${props.nft.marketValue}NULS${usd}`
+  return `${props.nft.marketValue} NULS${usd}`
 }
 
 

@@ -17,7 +17,7 @@
         <div class="flex justify-between h-16">
           <div class="flex">
             <router-link to="/" class="flex-shrink-0 flex items-center">
-              <GradientText type="primary" class="text-2xl">PumpNFT</GradientText>
+              <GradientText type="primary" class="text-2xl">naiNFT</GradientText>
             </router-link>
           </div>
           <div class="flex items-center space-x-4">
@@ -99,6 +99,8 @@ onMounted(() => {
 })
 const initData = ()=>{
    walletStore.getNulsUsdPrice()
+   walletStore.connect()
+
    intervalId = setInterval(() => {
     //NULS价格获取
     walletStore.getNulsUsdPrice()

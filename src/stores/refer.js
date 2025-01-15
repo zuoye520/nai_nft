@@ -4,6 +4,7 @@ import copy from 'copy-to-clipboard';
 import * as api from '../services/api'
 import { useWalletStore } from './wallet';
 import { useGlobalToast } from '../plugins/toast'
+import {fromAmount,formatUsd} from '../utils/format'
 export const useReferStore = defineStore('refer', () => {
   const walletStore = useWalletStore();
   const toast = useGlobalToast()
@@ -31,8 +32,16 @@ export const useReferStore = defineStore('refer', () => {
   //奖励列表
   async function getHistoryRefers(params) {
     const result = await api.historyRefers(params);
+    const list = result.list.map((item)=>{
+      item.user = item.inviteeAddress
+      item.reward = fromAmount(item.amount)
+      item.date = item.createdDate
+      return item
+    })
+
     referralHistoryTotal.value = result.totalCount
-    referralHistory.value = result.list;
+
+    referralHistory.value = list;
 
   }
   //copy 邀请链接

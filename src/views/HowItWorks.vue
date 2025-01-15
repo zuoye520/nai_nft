@@ -5,8 +5,8 @@
         <div class="text-center mb-16">
           <h1 class="text-4xl font-bold text-white mb-6">How It Works</h1>
           <p class="text-xl text-gray-300 leading-relaxed">
-            <!-- PumpNFT — the world's first NFT + DEFI liquidity protocol, transforms NFT transactions from the traditional floor price model to a simpler Swap model, and continuously injects liquidity into NFT through NULS consensus node income, so that liquidity is inexhaustible. -->
-            PumpNFT — the world’s first NFT liquidity protocol combined with AI Agent. 
+            <!-- naiNFT — the world's first NFT + DEFI liquidity protocol, transforms NFT transactions from the traditional floor price model to a simpler Swap model, and continuously injects liquidity into NFT through NULS consensus node income, so that liquidity is inexhaustible. -->
+            naiNFT — the world’s first NFT liquidity protocol combined with AI Agent. 
           </p>
           <p class="text-xl text-gray-300 leading-relaxed">It redefines NFT transactions by shifting from the traditional floor price model to a streamlined Swap model. By leveraging NULS staking rewards, it provides a continuous injection of liquidity, ensuring an inexhaustible and sustainable ecosystem for NFTs.</p>
         </div>
