@@ -6,7 +6,7 @@ export const nftFormSchema = yup.object({
     .nullable()
     .default(null)
     .min(3, 'Collection name must be at least 3 characters')
-    .max(50, 'Collection name must be less than 50 characters')
+    .max(20, 'Collection name must be less than 20 characters')
     .default(null), // 设置默认值，避免初始验证
 
   nftCount: yup

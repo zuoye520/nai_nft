@@ -75,6 +75,7 @@ export const useNftStore = defineStore('nft', () => {
     id:'',
     name: '',
     creator: 'Nuls',
+    contractAddress:'',
     image: '',
     price: 0,
     mintPrice: 0,

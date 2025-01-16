@@ -117,8 +117,15 @@ const onSubmit = handleSubmit(async (values) => {
       proxy.$toast.show('collectionName is invalid', 'error')
       return;
     }
-    loading.show('Transaction processing ...')
     
+    loading.show('Transaction processing ...')
+    let balance = await walletStore.getBalance()
+    balance = balance && proxy.$format.fromAmount(balance)
+    if(balance*1 <= currentChainConfig.value.createPayment){
+      proxy.$toast.show('Insufficient NULS balance', 'error')
+      loading.hide()
+      return;
+    }
     //上传图片
     const resImg = await walletStore.uploadFile(values.image)
     console.log('uploadFile result:', resImg)
@@ -162,19 +169,17 @@ const onSubmit = handleSubmit(async (values) => {
   }
 });
 function validTokenNameOrSymbol(name) {
-  if (!name || name.trim().length === 0) {
-      return false;
-  }
-
+  // if (!name || name.trim().length === 0) {
+  //     return false;
+  // }
   let upperCaseName = name.toUpperCase();
   if (upperCaseName === "NULS") {
       return false;
   }
-
-  let aliasBytes = Buffer.from(name, 'utf-8'); 
-  if (aliasBytes.length < 1 || aliasBytes.length > 20) {
-      return false;
-  }
+  // let aliasBytes = Buffer.from(name, 'utf-8'); 
+  // if (aliasBytes.length < 1 || aliasBytes.length > 20) {
+  //     return false;
+  // }
 
   const regex = /^[a-zA-Z0-9_]+$/;
   return regex.test(name);
