@@ -139,7 +139,7 @@
               <button 
                 v-for="type in ['buy', 'sell']" 
                 :key="type"
-                @click="tradeType = type;amount = ''"
+                @click="handelBuyAndSell(type)"
                 class="flex-1 py-3 rounded-lg text-center font-medium transition-all"
                 :class="[
                   tradeType === type 
@@ -277,7 +277,7 @@ const canMint = computed(() => {
 })
 
 const canSwap = computed(() => {
-  return amount.value && Number(amount.value) > 0
+  return amount.value && Number(amount.value) > 0 && totalSwapAmount.value
 })
 
 // Methods
@@ -285,6 +285,12 @@ const onImageLoad = () => {
   imageLoaded.value = true
 }
 
+const handelBuyAndSell = (type)=>{
+  if(tradeType.value == type) return;
+  tradeType.value = type;
+  amount.value = '';
+  totalSwapAmount.value = 0
+}
 const checkPrice = async (preset) => {
   amount.value = preset
   const methodName = tradeType.value == "buy" ? "getBuyCost" : "getSellAmount"
@@ -330,7 +336,7 @@ const handleMint = async () => {
 
 const handleSwap = async () => {
   try {
-    
+
     let data = {
       from: account.value,
       value: totalSwapAmount.value,

@@ -11,7 +11,7 @@ export const useWalletStore = defineStore('wallet', () => {
   const authStore = useAuthStore();
   const toast = useGlobalToast()
 
-  const intervalId = ref(null)
+  // const intervalId = ref(null)
   const account = ref(null)
   const accountPub = ref(null)
   const chainInfo = ref(null)
@@ -134,7 +134,8 @@ export const useWalletStore = defineStore('wallet', () => {
 
   function setupEventListeners() {
     walletService.onAccountsChanged((accounts) => {
-      window.location.reload();
+      // window.location.reload();
+      window.location.replace('/');
       // account.value = accounts[0] || null
       // if (!accounts[0]) {
       //   disconnect()
@@ -167,7 +168,7 @@ export const useWalletStore = defineStore('wallet', () => {
     chainInfo.value = null
     error.value = null
     networkStatus.value = { connected: false, chainId: null, error: null }
-    clearInterval(intervalId.value);
+    // clearInterval(intervalId.value);
     walletService.disconnect()
     toggleWalletModal()
   }
