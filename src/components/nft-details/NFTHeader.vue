@@ -328,7 +328,7 @@ const handleMint = async () => {
     proxy.$toast.show('Transaction Submitted', 'success')
   } catch (error) {
     console.error('Mint error:', error)
-    proxy.$toast.show('Mint error', 'error')
+    proxy.$toast.show(error, 'error')
   }
 }
 
@@ -378,7 +378,7 @@ const handleSwap = async () => {
     proxy.$toast.show('Transaction Submitted', 'success')
   } catch (error) {
     console.error('Swap error:', error)
-    proxy.$toast.show('Swap error', 'error')
+    proxy.$toast.show(error, 'error')
   }
 }
 const intervalId = ref(null) 

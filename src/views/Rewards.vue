@@ -111,9 +111,14 @@ const initData = async ()=>{
   isLoading.value = false
 }
 const handleWithdraw = async () => {
-  await rewardsStore.receiveTiger()
-  // console.log('Withdrawing rewards')
-  proxy.$toast.show('Withdrawing rewards', 'success')
+  try {
+    await rewardsStore.receiveTiger()
+    // console.log('Withdrawing rewards')
+    proxy.$toast.show('Withdrawing rewards', 'success')
+  } catch (error) {
+    proxy.$toast.show(error, 'error')
+  }
+  
   initData()
 }
 </script>

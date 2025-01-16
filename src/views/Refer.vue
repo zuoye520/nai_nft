@@ -94,8 +94,8 @@ const store = useWalletStore()
 import { useReferStore } from '../stores/refer'
 const referStore = useReferStore()
 
-const origin = ref(window.location.origin);
-const address = ref('')
+// const origin = ref(window.location.origin);
+// const address = ref('')
 const isLoading = ref(true)
 
 const currentPage = ref(1)
@@ -106,13 +106,13 @@ onBeforeMount(() => {
   console.log('Component will be mounted')
 })
 onMounted(() => {
-  address.value = route.params.address
-  const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
-  referStore.referralLink = `${origin.value}?inviteCode=${userInfo.inviteCode}`
-  referStore.stats = {
-    totalReferrals:userInfo.inviteCount || 0,//邀请数量
-    totalEarnings:userInfo.inviteReward || 0 //获得的奖励
-  } 
+  // address.value = route.params.address
+  // const userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
+  // referStore.referralLink = `${origin.value}?inviteCode=${userInfo.inviteCode}`
+  // referStore.stats = {
+  //   totalReferrals:userInfo.inviteCount || 0,//邀请数量
+  //   totalEarnings:userInfo.inviteReward || 0 //获得的奖励
+  // } 
   initData()
 })
 // 监听页码变化
@@ -123,11 +123,14 @@ watch(currentPage, (newPage) => {
 })
 const initData = async ()=>{
   isLoading.value = true;
-  await referStore.getHistoryRefers({
-    address:address.value,
-    pageNum:1,
-    pageSize:20
-  })
+  await referStore.getReferInfo()
+  if(route.params.address){
+    await referStore.getHistoryRefers({
+      address:route.params.address,
+      pageNum:1,
+      pageSize:20
+    })
+  }
   isLoading.value = false;
 }
 

@@ -82,7 +82,7 @@ export const useWalletStore = defineStore('wallet', () => {
     } catch (err) {
       error.value = err.message || 'Failed to connect to wallet'
       console.error('Failed to connect to wallet:', err)
-      toast.show('Failed to connect to wallet', 'error')
+      toast.show(error.value, 'error')
       account.value = null
       chainInfo.value = null
     } finally {
@@ -194,7 +194,7 @@ export const useWalletStore = defineStore('wallet', () => {
     } catch (error) {
       console.error('contractCall error:',error)
       // toast.show(error.message, 'error')
-      throw new Error(error)
+      throw new Error(error.message || error)
     }
   }
   async function copyAddress (address){
@@ -202,7 +202,7 @@ export const useWalletStore = defineStore('wallet', () => {
       console.log(address || account.value)
       copy(address || account.value)
       console.log('copy ok')
-      toast.show('Address copied to clipboard', 'success')
+      toast.show('Copied', 'success')
       // Could add a toast notification here
     } catch (error) {
       console.error('Failed to copy address:', error)

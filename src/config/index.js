@@ -26,7 +26,7 @@ export const CHAINS = {
     explorer: 'https://beta.nulscan.io',
     createPayment:10,//10 NULS
     contracts: {
-      mainAddress:"tNULSeBaMxxh9HDNRJ2rDRk4ym5MWuenYsnvyj",
+      mainAddress:"tNULSeBaN9vN8HoahX738RVFJ5SXjrR1NDk6ni",
       domainAddress:'tNULSeBaN6PdzE7zLsLDCEpLAUnMZMCREV27f4',
       nrc721Address: 'tNULSeBaNAKi6YYeoLPmQEjvtPhYeTRd6MZzfE',
       stakeAddress:'tNULSeBaN9ivFT3AHDMcBkDcWAuJ4ptQkxoio7'
@@ -59,7 +59,7 @@ export const DC_URL ="http://discord.com/invite/aRCwbj47WN"
 export const GITHUB_URL ="https://github.com/cobble586/NulsDomainContract"
 //默认头像
 // export const DEFAULT_AVATAR = 'https://api.dicebear.com/7.x/bottts/svg?seed=5'
-import avatar from '/public/avatar.svg';
+import avatar from '/src/assets/avatar.svg';
 export const DEFAULT_AVATAR = avatar
 
 

@@ -9,11 +9,13 @@ export const useReferStore = defineStore('refer', () => {
   const walletStore = useWalletStore();
   const toast = useGlobalToast()
 
+  const origin = ref(window.location.origin);
   const referralLink = ref(``)
 
   const stats = ref({
     totalReferrals: 0,
-    totalEarnings: '0'
+    totalEarnings: '0',
+    inviteCode:''
   })
   const referralHistoryTotal = ref(0)
   // Mock
@@ -29,6 +31,19 @@ export const useReferStore = defineStore('refer', () => {
       reward: '0.00369'
     }
   ])
+
+  //获取人数和数量
+  async function getReferInfo(params) {
+    const result = await api.userInfo(params);
+    stats.value = {
+      totalReferrals:result.inviteCount,
+      totalEarnings:result.inviteReward && fromAmount(result.inviteReward),
+      inviteCode:result.inviteCode
+    };
+    referralLink.value = `${origin.value}?inviteCode=${result.inviteCode}`
+    return result;
+
+  }
   //奖励列表
   async function getHistoryRefers(params) {
     const result = await api.historyRefers(params);
@@ -44,10 +59,12 @@ export const useReferStore = defineStore('refer', () => {
     referralHistory.value = list;
 
   }
+
+
   //copy 邀请链接
   function copyReferralLink(){
     copy(referralLink.value)
-    toast.show('Copy Success', 'success')
+    toast.show('Copied', 'success')
   }
 
   return {
@@ -56,6 +73,7 @@ export const useReferStore = defineStore('refer', () => {
     referralHistory,
     copyReferralLink,
     referralHistoryTotal,
-    getHistoryRefers
+    getHistoryRefers,
+    getReferInfo
   }
 })

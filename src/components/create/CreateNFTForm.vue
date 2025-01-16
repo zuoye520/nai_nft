@@ -112,6 +112,11 @@ const onSubmit = handleSubmit(async (values) => {
     if (!validationResult) {
       return;
     }
+    const  validName = validTokenNameOrSymbol(values.collectionName)
+    if(!validName){
+      proxy.$toast.show('collectionName is invalid', 'error')
+      return;
+    }
     loading.show('Transaction processing ...')
     
     //上传图片
@@ -156,4 +161,22 @@ const onSubmit = handleSubmit(async (values) => {
     // isSubmitting.value = false;
   }
 });
+function validTokenNameOrSymbol(name) {
+  if (!name || name.trim().length === 0) {
+      return false;
+  }
+
+  let upperCaseName = name.toUpperCase();
+  if (upperCaseName === "NULS") {
+      return false;
+  }
+
+  let aliasBytes = Buffer.from(name, 'utf-8'); 
+  if (aliasBytes.length < 1 || aliasBytes.length > 20) {
+      return false;
+  }
+
+  const regex = /^[a-zA-Z0-9_]+$/;
+  return regex.test(name);
+}
 </script>
