@@ -75,15 +75,37 @@
             <p class="text-gray-300">
               During the Mint phase, you can directly Mint your favorite NFTs and have a 100% chance to win the slot lucky bonus reward. After the Mint phase, you can trade NFTs on the Swap page. If the transaction fee is 10% or higher, each transaction will also give you a chance to win the slot lucky bonus.
             </p>
+            <p class="mt-5"><strong>Lucky Bonus Rules:</strong></p>
+            <p class="mt-2">
+              Mint/Swap NFT randomly allocates slot pool balances from 0 to 100%, and users have a winning odds of up to 1000%+.
+            </p>
           </div>
         </div>
 
         <!-- For Users Section -->
-        <div>
+        <div class="mb-16">
           <h2 class="text-2xl font-bold text-white mb-6">For the inviter</h2>
           <div class="bg-gray-900/50 rounded-xl p-8 border border-gray-800">
             <p class="text-gray-300">   
                 When your friends mint or trade NFTs, you will be rewarded and you will share 50% of the platform revenue as a reward.
+            </p>
+          </div>
+        </div>
+        <!-- For Airdrop -->
+        <div class="mb-16">
+          <h2 class="text-2xl font-bold text-white mb-6">Airdrop</h2>
+          <div class="bg-gray-900/50 rounded-xl p-8 border border-gray-800">
+            <p class="text-gray-300">   
+              Coming Soon
+            </p>
+          </div>
+        </div>
+        <!-- For Economic Model -->
+        <div>
+          <h2 class="text-2xl font-bold text-white mb-6">Economic Model</h2>
+          <div class="bg-gray-900/50 rounded-xl p-8 border border-gray-800">
+            <p class="text-gray-300">   
+              Coming Soon
             </p>
           </div>
         </div>

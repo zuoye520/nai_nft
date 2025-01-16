@@ -121,6 +121,9 @@
             />
             
           </div>
+          <div v-if="nfts.length === 1" class="text-center py-12">
+            <div class="text-gray-400">No NFTs</div>
+          </div>
         </BaseLocalLoading>
           <BasePagination
             v-model:currentPage="currentPage"
