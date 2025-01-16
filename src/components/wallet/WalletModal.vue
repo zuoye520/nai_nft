@@ -90,6 +90,7 @@ const store = useWalletStore()
 
 const handleDisconnect = () => {
   store.disconnect()
-  router.push('/')
+  // router.push('/')
+  router.replace('/');
 }
 </script>
