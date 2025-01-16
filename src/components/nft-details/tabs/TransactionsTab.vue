@@ -31,7 +31,7 @@
                 }}</span>
                 <!-- Lucky Bonus Badge -->
                 <div
-                  v-if="tx.luckyBonus"
+                  v-if="tx.luckyBonus > 0"
                   class="flex items-center space-x-1 text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded-full"
                 >
                   <SparklesIcon class="w-4 h-4" />
