@@ -26,7 +26,7 @@ export const CHAINS = {
     explorer: 'https://beta.nulscan.io',
     createPayment:10,//10 NULS
     contracts: {
-      mainAddress:"tNULSeBaN9vN8HoahX738RVFJ5SXjrR1NDk6ni",
+      mainAddress:"tNULSeBaMzFS3ckgpSC94cpm2nf9vz97c6XenJ",
       domainAddress:'tNULSeBaN6PdzE7zLsLDCEpLAUnMZMCREV27f4',
       nrc721Address: 'tNULSeBaNAKi6YYeoLPmQEjvtPhYeTRd6MZzfE',
       stakeAddress:'tNULSeBaN9ivFT3AHDMcBkDcWAuJ4ptQkxoio7'
