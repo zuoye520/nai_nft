@@ -1,12 +1,12 @@
 <template>
-  <div class="fixed inset-x-0 top-4 z-[9999] flex items-center justify-center pointer-events-none">
+  <div class="fixed top-20 right-4 z-[9999] flex flex-col items-end pointer-events-none">
     <TransitionGroup
       enter-active-class="transition duration-300 ease-out"
-      enter-from-class="transform -translate-y-4 opacity-0"
-      enter-to-class="transform translate-y-0 opacity-100"
+      enter-from-class="transform translate-x-full opacity-0"
+      enter-to-class="transform translate-x-0 opacity-100"
       leave-active-class="transition duration-200 ease-in"
-      leave-from-class="transform translate-y-0 opacity-100"
-      leave-to-class="transform -translate-y-4 opacity-0"
+      leave-from-class="transform translate-x-0 opacity-100"
+      leave-to-class="transform translate-x-full opacity-0"
     >
       <div
         v-for="toast in toasts"
