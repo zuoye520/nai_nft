@@ -21,7 +21,7 @@
         <!-- Lazy Loaded Image -->
         <img 
           :src="nft.image" 
-          :alt="nft.name"
+          :alt="nft.name" 
           class="w-full h-full object-cover transition-all duration-700"
           :class="{ 'opacity-0': !imageLoaded, 'opacity-100': imageLoaded }"
           loading="lazy"
@@ -44,105 +44,26 @@
         </div>
       </div>
 
-      <!-- Progress Bar Section -->
+      <!-- Mint Progress -->
       <div class="mt-8 space-y-4">
         <div class="flex justify-between items-center">
-          <h3 class="text-xl font-semibold text-white">Mint Progress </h3>
-          <div class="flex items-center space-x-2">
-            <!-- <span class="text-gray-400">Total:</span> -->
-            <span class="text-green-400">{{ mintProgress }}%</span>
-          </div>
+          <h3 class="text-xl font-semibold text-white">Mint Progress</h3>
+          <span class="text-green-400">{{ mintProgress }}%</span>
         </div>
-
-        <!-- Progress Bar Container -->
-        <div class="relative">
-          <!-- Progress Bar -->
-          <div class="w-full h-4 bg-gray-800 rounded-full flex relative">
-            <!-- Mint Phase (Fixed 70%) -->
-            <div 
-              class="progress-section relative h-full rounded-l-full"
-              :style="{width: `${nft.mintPercent}%`}"
-            >
-              <!-- Mint Progress Fill -->
-              <div class="absolute inset-0 bg-gradient-to-r from-green-400 to-blue-500 overflow-hidden rounded-l-full">
-                <div 
-                  class="absolute inset-0 bg-gray-800 transition-all duration-300"
-                  :style="{ left: `${mintProgress}%` }"
-                ></div>
-              </div>
-
-              <!-- Mint Phase Tooltip -->
-              <div class="progress-tooltip">
-                <div class="tooltip-inner">
-                  <div class="text-center mb-1 font-medium">Mint Phase</div>
-                  <!-- <div class="flex justify-between text-gray-300">
-                    <span>Progress:</span>
-                    <span>{{ mintProgress }}%</span>
-                  </div> -->
-                  <div class="flex justify-between text-gray-300">
-                    <span>Supply:</span>
-                    <span>{{ targetMintSupply }} NFTs</span>
-                  </div>
-                  <div class="flex justify-between text-gray-300" v-if="targetMintSupply != nft.mintedSupply">
-                    <span>Minted:</span>
-                    <span>{{ nft.mintedSupply }} NFTs</span>
-                  </div>
-                  <div class="flex justify-between text-gray-300" v-if="targetMintSupply != nft.mintedSupply">
-                    <span>Remaining:</span>
-                    <span>{{ remainingSupply }} NFTs</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Swap Phase (Fixed 30%) -->
-            <div 
-              class="progress-section relative h-full rounded-r-full"
-              :style="{width: `${100-nft.mintPercent}%`}"
-            >
-              <!-- Swap Progress Fill -->
-              <div class="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 overflow-hidden rounded-r-full">
-                <div 
-                  class="absolute inset-0 bg-gray-800 transition-all duration-300"
-                  :style="{ left: `100%` }"
-                ></div>
-              </div>
-
-              <!-- Swap Phase Tooltip -->
-              <div class="progress-tooltip">
-                <div class="tooltip-inner">
-                  <div class="text-center mb-1 font-medium">Swap Phase</div>
-                  <!-- <div class="flex justify-between text-gray-300">
-                    <span>Liquidity Pool:</span>
-                    <span>{{ swapPhaseProgress }}%</span>
-                  </div> -->
-                  <div class="flex justify-between text-gray-300">
-                    <span>Supply:</span>
-                    <span>{{ swapSupply }} NFTs</span>
-                  </div>
-                  <!-- <div class="flex justify-between text-gray-300">
-                    <span>Current Price:</span>
-                    <span>{{ nft.currentPrice || nft.mintPrice }} NULS</span>
-                  </div> -->
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Phase Labels -->
-          <div class="absolute top-full left-0 right-0 flex mt-2" v-if="remainingSupply > 0">
-            <div style="width: 70%" class="text-left">
-              <span class="text-sm text-gray-400">Mint Phase({{ nft.mintPercent }}%)</span>
-            </div>
-            <div class="flex-1 text-right">
-              <span class="text-sm text-gray-400">Swap Phase({{ 100-nft.mintPercent }}%)</span>
-            </div>
-          </div>
+        <div class="w-full h-4 bg-gray-800 rounded-full overflow-hidden">
+          <div 
+            class="h-full bg-gradient-to-r from-green-400 to-blue-500 transition-all duration-300"
+            :style="{ width: `${mintProgress}%` }"
+          ></div>
+        </div>
+        <div class="flex justify-between text-sm text-gray-400">
+          <span>{{ nft.mintedSupply }} / {{ nft.totalSupply }} Minted</span>
+          <span>Target: {{ nft.mintPercent }}%</span>
         </div>
       </div>
 
       <!-- Trade Interface -->
-      <div class="mt-10 space-y-6">
+      <div class="mt-8 space-y-6">
         <template v-if="isMintPhase">
           <!-- Mint Interface -->
           <div>
@@ -163,7 +84,7 @@
                   v-for="preset in [1, 5, 10, 20]" 
                   :key="preset"
                   @click="amount = preset"
-                  class="px-2 py-1 text-sm rounded bg-gray-800 text-gray-400 hover:text-green-400 transition-colors"
+                  class="px-2 py-1 text-sm rounded bg-gray-800 text-gray-400 hover:text-green-400 transition-colors "
                 >
                   {{ preset }}
                 </button>
@@ -205,9 +126,9 @@
             Connect
           </BaseButton>
 
-          <!-- <p class="text-sm text-gray-400 text-center">
+          <p class="text-sm text-gray-400 text-center">
             Mint phase will end at {{ nft.mintPercent }}% ({{ remainingSupply }} NFTs remaining)
-          </p> -->
+          </p>
         </template>
 
         <template v-else>
@@ -267,7 +188,7 @@
               </div>
               <div v-if="account" class="flex justify-between text-sm font-medium">
                 <span class="text-gray-400">Available Balance</span>
-                <span class="text-green-400">{{ tradeType === 'buy' ? `${$format.fromAmount( walletStore.nulsBalance)} NULS`: `${nftStore.listTotal} NFT`}} </span>
+                <span  class="text-green-400">{{ tradeType === 'buy' ? `${$format.fromAmount( walletStore.nulsBalance)} NULS`: `${nftStore.listTotal} NFT`}} </span>
               </div>
               <div class="flex justify-between text-sm font-medium">
                 <span class="text-gray-400">{{ tradeType === 'buy' ? 'Cost' : 'Get' }}</span>
@@ -300,12 +221,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, getCurrentInstance } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount,getCurrentInstance } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useWalletStore } from '../../stores/wallet'
 import { useNftStore } from '../../stores/nft'
 import BaseButton from '../BaseButton.vue'
-
 const { proxy } = getCurrentInstance()
 const walletStore = useWalletStore()
 const nftStore = useNftStore()
@@ -329,44 +249,17 @@ const tradeType = ref('buy')
 const swapPrice = ref(0)
 const totalSwapAmount = ref(0)
 
+// Computed properties
 const mintProgress = computed(() => {
   return ((props.nft.mintedSupply / (props.nft.totalSupply * props.nft.mintPercent / 100)) * 100).toFixed(1)
 })
 
-// Progress bar constants and computed properties
-const MINT_PHASE_PERCENTAGE = 70
-const SWAP_PHASE_PERCENTAGE = 30
-
-const targetMintSupply = computed(() => {
-  return Math.floor(props.nft.totalSupply * props.nft.mintPercent / 100)
-})
-
-const swapSupply = computed(() => {
-  return props.nft.totalSupply - targetMintSupply.value
-})
-
-const mintPhaseProgress = computed(() => {
-  if (props.nft.mintedSupply >= targetMintSupply.value) {
-    return 100
-  }
-  return (props.nft.mintedSupply / targetMintSupply.value * 100).toFixed(2)
-})
-
-const swapPhaseProgress = computed(() => {
-  if (props.nft.mintedSupply <= targetMintSupply.value) {
-    return 0
-  }
-  const swapSupply = props.nft.totalSupply - targetMintSupply.value
-  const swapMinted = props.nft.mintedSupply - targetMintSupply.value
-  return ((swapMinted / swapSupply) * 100).toFixed(2)
-})
-
-const totalProgress = computed(() => {
-  return ((props.nft.mintedSupply / props.nft.totalSupply) * 100).toFixed(2)
+const isMintPhase = computed(() => {
+  return Number(mintProgress.value) < 100
 })
 
 const remainingSupply = computed(() => {
-  return targetMintSupply.value - props.nft.mintedSupply
+  return (props.nft.totalSupply * props.nft.mintPercent / 100) - props.nft.mintedSupply
 })
 
 const getFeePercentage = computed(() => {
@@ -387,22 +280,17 @@ const canSwap = computed(() => {
   return amount.value && Number(amount.value) > 0 && totalSwapAmount.value
 })
 
-const isMintPhase = computed(() => {
-  return props.nft.mintedSupply < targetMintSupply.value
-})
-
 // Methods
 const onImageLoad = () => {
   imageLoaded.value = true
 }
 
-const handelBuyAndSell = (type) => {
-  if(tradeType.value == type) return
-  tradeType.value = type
-  amount.value = ''
+const handelBuyAndSell = (type)=>{
+  if(tradeType.value == type) return;
+  tradeType.value = type;
+  amount.value = '';
   totalSwapAmount.value = 0
 }
-
 const checkPrice = async (preset) => {
   amount.value = preset
   const methodName = tradeType.value == "buy" ? "getBuyCost" : "getSellAmount"
@@ -420,14 +308,14 @@ const checkPrice = async (preset) => {
 
 const handleMint = async () => {
   try {
-    if(amount.value > 20) {
+    if(amount.value >20){
       proxy.$toast.show('A maximum of 20 NFTs can be minted at a time', 'error')
-      return
+      return;
     }
     const balance = proxy.$format.fromAmount(walletStore.nulsBalance)
-    if(balance * 1 < totalMintAmount.value * 1) {
+    if( balance*1 < totalMintAmount.value*1){
       proxy.$toast.show('Insufficient balance', 'error')
-      return
+      return;
     }
     const data = {
       from: account.value,
@@ -448,11 +336,13 @@ const handleMint = async () => {
   }
 }
 
+
+
 const handleSwap = async () => {
   try {
-    if(amount.value > 20) {
+    if(amount.value > 20){
       proxy.$toast.show('A maximum of 20 NFTs can be swapped at a time', 'error')
-      return
+      return;
     }
     let data = {
       from: account.value,
@@ -466,18 +356,18 @@ const handleSwap = async () => {
     }
     if (tradeType.value == 'buy') {
       const balance = proxy.$format.fromAmount(walletStore.nulsBalance)
-      if(balance * 1 < totalSwapAmount.value * 1) {
+      if( balance*1 < totalSwapAmount.value*1){
         proxy.$toast.show('Insufficient balance', 'error')
-        return
+        return;
       }
-    } else if (tradeType.value == 'sell') {
+    }else if (tradeType.value == 'sell') {
       if (nftStore.listTotal < amount.value) {
         proxy.$toast.show('Insufficient NFT balance', 'error')
-        return
+        return;
       }
-      const nftIds = []
+      const nftIds = [] //heldList.map((item) => item.tokenId)
       for (let i = 0; i < amount.value; i++) {
-        const item = nftStore.heldNFTs[i]
+        const item = nftStore.heldNFTs[i];
         nftIds.push(item.tokenId)
       }
       data = {
@@ -498,9 +388,7 @@ const handleSwap = async () => {
     proxy.$toast.show(error, 'error')
   }
 }
-
-const intervalId = ref(null)
-
+const intervalId = ref(null) 
 // Lifecycle hooks
 onMounted(() => {
   initData()
@@ -530,13 +418,13 @@ onBeforeUnmount(() => {
   if (observer.value) {
     observer.value.disconnect()
   }
-  clearInterval(intervalId.value)
+  clearInterval(intervalId.value);
 })
 
 //初始化数据
-const initData = () => {
+const initData = ()=>{
   intervalId.value = setInterval(async () => {
-    if(account.value) {
+    if(account.value){
       //钱包余额
       walletStore.getBalance()
       //持有的NFT数量
@@ -547,7 +435,7 @@ const initData = () => {
       })
     }
     nftStore.getNFTInfo(props.nft.id)
-  }, 3000) //3秒执行一次
+  }, 3000);//3秒执行一次
 }
 </script>
 
@@ -565,55 +453,5 @@ const initData = () => {
   right: 0;
   bottom: 0;
   left: 0;
-}
-
-.progress-section {
-  cursor: pointer;
-  position: relative;
-}
-
-.progress-section:hover .progress-tooltip {
-  opacity: 1;
-  visibility: visible;
-  transform: translate(-50%, -5px);
-}
-
-.progress-tooltip {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translate(-50%, 0);
-  margin-bottom: 15px;
-  opacity: 0;
-  visibility: hidden;
-  transition: all 0.2s ease-in-out;
-  z-index: 100;
-  pointer-events: none;
-  width: max-content;
-}
-
-.tooltip-inner {
-  background-color: rgba(17, 24, 39, 0.95);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(75, 85, 99, 0.3);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  min-width: 12rem;
-  position: relative;
-  color: white;
-  white-space: nowrap;
-}
-
-.tooltip-inner::after {
-  content: '';
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 6px solid rgba(17, 24, 39, 0.95);
 }
 </style>
