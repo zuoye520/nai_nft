@@ -4,10 +4,13 @@ export const nftFormSchema = yup.object({
   collectionName: yup
     .string()
     .nullable()
-    .default(null)
+    .default(null)// 设置默认值，避免初始验证
     .min(3, 'Collection name must be at least 3 characters')
     .max(20, 'Collection name must be less than 20 characters')
-    .default(null), // 设置默认值，避免初始验证
+    .matches(
+      /^[a-zA-Z0-9_]+$/,
+      'Collection name can only contain letters, numbers, and underscores'
+    ), // 只允许字母、数字、下划线
 
   nftCount: yup
     .number()

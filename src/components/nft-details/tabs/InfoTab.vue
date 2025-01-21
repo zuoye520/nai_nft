@@ -14,12 +14,12 @@
       </div>
     </div>
 
-    <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+    <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800" v-if="nft.description">
       <h3 class="text-xl font-semibold text-white mb-4">Description</h3>
       <p class="text-gray-300">{{ nft.description }}</p>
     </div>
 
-    <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800">
+    <div class="bg-gray-900/50 rounded-xl p-6 border border-gray-800" v-if="nft.social.twitter || nft.social.telegram || nft.social.website">
       <h3 class="text-xl font-semibold text-white mb-4">Social Links</h3>
       <div class="flex space-x-4">
         <SocialLink v-if="nft.social?.twitter" icon="twitter" :href="nft.social.twitter" />
