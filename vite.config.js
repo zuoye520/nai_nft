@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
+  base: env.VITE_APP_CDN_URL, // 设置资源的基础路径
   plugins: [vue()],
   server: {
     proxy: {

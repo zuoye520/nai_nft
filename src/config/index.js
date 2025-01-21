@@ -28,7 +28,7 @@ export const CHAINS = {
     createPayment:10,//10 NULS
     withdrawalFee:1,//1%
     contracts: {
-      mainAddress:"tNULSeBaMzFS3ckgpSC94cpm2nf9vz97c6XenJ",
+      mainAddress:"tNULSeBaNAyErtBNEuiBy77ToJm1KB2ys3eTR9",
       domainAddress:'tNULSeBaN6PdzE7zLsLDCEpLAUnMZMCREV27f4',
       nrc721Address: 'tNULSeBaNAKi6YYeoLPmQEjvtPhYeTRd6MZzfE',
       stakeAddress:'tNULSeBaN9ivFT3AHDMcBkDcWAuJ4ptQkxoio7'
