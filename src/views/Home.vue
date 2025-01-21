@@ -18,12 +18,64 @@
           
           <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 animate-fade-in animation-delay-600">
             <CreateNFTButton />
-            <BaseButton class="text-lg px-8 py-3">
-              <router-link to="/connect-ai">Connect AI</router-link>
-            </BaseButton>
+            <button
+              class="relative group"
+              @click="$router.push('/connect-ai')"
+            >
+              <!-- Animated Background Gradient -->
+              <div class="absolute inset-0 bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 rounded-xl opacity-75 group-hover:opacity-100 blur-xl transition-all duration-500 animate-gradient-shift"></div>
+              
+              <!-- Main Button Container -->
+              <div class="relative px-8 py-3 bg-black/80 backdrop-blur-sm rounded-xl flex items-center gap-3 overflow-hidden">
+                <!-- Animated Border -->
+                <div class="absolute inset-px rounded-xl bg-gradient-to-r from-purple-500 via-blue-500 to-green-500 opacity-50 group-hover:opacity-100 transition-opacity duration-500"></div>
+                
+                <!-- Moving Light Effect -->
+                <div class="absolute inset-0">
+                  <div class="absolute inset-0 translate-x-[-100%] group-hover:translate-x-[100%] bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 transition-transform duration-1000 ease-out"></div>
+                </div>
+
+                <!-- Content Container -->
+                <div class="relative flex items-center gap-3 z-10">
+                  <!-- Animated Icon -->
+                  <div class="relative">
+                    <div class="absolute inset-0 bg-gradient-to-r from-purple-500 to-green-500 rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-all duration-500 scale-[2] animate-pulse"></div>
+                    <div class="relative transform group-hover:rotate-180 transition-transform duration-500">
+                      <CpuChipIcon class="w-5 h-5 text-purple-400 group-hover:text-white transition-colors duration-500" />
+                    </div>
+                  </div>
+
+                  <!-- Animated Text -->
+                  <span class="relative font-bold text-lg tracking-wider">
+                    <span class="absolute inset-0 bg-gradient-to-r from-purple-500 to-green-500 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500"></span>
+                    <span class="relative text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-green-400 group-hover:text-white transition-all duration-500">
+                      Connect AI
+                    </span>
+                  </span>
+                </div>
+
+                <!-- Floating Particles -->
+                <div class="absolute inset-0 pointer-events-none">
+                  <div v-for="n in 6" :key="n" class="particle-enhanced absolute w-1 h-1 rounded-full" :style="particleStyles[n-1]"></div>
+                </div>
+              </div>
+            </button>
           </div>
-          <div class="mt-10 justify-center">
-            <router-link to="/how-it-works">How it works?</router-link>
+          <div class="mt-10 flex justify-center">
+            <router-link 
+              to="/how-it-works"
+              class="relative group text-gray-400 hover:text-white transition-colors duration-300"
+            >
+              <!-- Animated Underline -->
+              <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-green-400 to-blue-500 group-hover:w-full transition-all duration-300"></span>
+              
+              <!-- Text with Glow Effect -->
+              <span class="relative">
+                How it works?
+                <!-- Glow Effect -->
+                <span class="absolute inset-0 bg-gradient-to-r from-green-400/0 via-blue-500/10 to-purple-500/0 blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+              </span>
+            </router-link>
           </div>
         </div>
       </div>
@@ -152,7 +204,8 @@ import {
   Squares2X2Icon,
   CurrencyDollarIcon,
   ArrowsRightLeftIcon,
-  XMarkIcon
+  XMarkIcon,
+  CpuChipIcon
 } from '@heroicons/vue/24/outline'
 const walletStore = useWalletStore()
 import { useNftStore } from '../stores/nft'
@@ -193,6 +246,15 @@ const pageSize = ref(16)
 const total = ref(16)
 
 const intervalId = ref(null)
+
+const particleStyles = [
+  { background: '#9333ea', top: '20%', left: '10%' },
+  { background: '#3b82f6', top: '60%', right: '10%' },
+  { background: '#22c55e', bottom: '20%', left: '30%' },
+  { background: '#9333ea', top: '30%', right: '20%' },
+  { background: '#3b82f6', bottom: '40%', right: '30%' },
+  { background: '#22c55e', top: '50%', left: '20%' }
+]
 
 // 监听页码变化
 watch(currentPage, (newPage) => {
@@ -244,25 +306,12 @@ onUnmounted(() => {
 })
 
 const refreshNFTs = async () => {
-  // proxy.$toast.show('message', 'success')
-  // proxy.$toast.show('message', 'error')
-  // proxy.$toast.show('message', 'warning')
-  // proxy.$toast.show('message', 'info')
-  
-  // loading.show('Loading NFTs...')
   isLoading.value = true
-  // 调用API获取NFT列表时传入排序和筛选参数
-  // console.log('getNFTs:',{
-  //   keyword: searchQuery.value,
-  //   orderBy: selectedSort.value === 'newest' ? 'DESC' : 'ASC',
-  //   projectState: selectedFilter.value === 'All' ? '' : selectedFilter.value
-  // })
   await nftStore.getNFTs({
     keyword: searchQuery.value,
     orderBy: selectedSort.value === 'newest' ? 'DESC' : 'ASC',
     projectState: selectedFilter.value === 'All' ? '' : selectedFilter.value
   })
-  // loading.hide()
   isLoading.value = false
 }
 
@@ -288,3 +337,54 @@ const clearSearch = () => {
   refreshNFTs()
 }
 </script>
+
+<style scoped>
+.particle-enhanced {
+  opacity: 0;
+  transform: scale(0) rotate(0deg);
+  transition: all 0.5s ease;
+}
+
+.group:hover .particle-enhanced {
+  animation: particle-float 2s ease-in-out infinite;
+  opacity: 0.6;
+}
+
+@keyframes particle-float {
+  0%, 100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) scale(1.5) rotate(180deg);
+  }
+}
+
+/* Stagger particle animations */
+.particle-enhanced:nth-child(1) { animation-delay: 0s; }
+.particle-enhanced:nth-child(2) { animation-delay: 0.2s; }
+.particle-enhanced:nth-child(3) { animation-delay: 0.4s; }
+.particle-enhanced:nth-child(4) { animation-delay: 0.6s; }
+.particle-enhanced:nth-child(5) { animation-delay: 0.8s; }
+.particle-enhanced:nth-child(6) { animation-delay: 1s; }
+
+/* Add backdrop blur on hover */
+.group:hover::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  background: radial-gradient(circle at center, rgba(147,51,234,0.1) 0%, transparent 70%);
+  filter: blur(20px);
+  z-index: -1;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 0.7; }
+}
+
+.group:hover .glow {
+  opacity: 1;
+  transform: scale(1.5);
+}
+</style>

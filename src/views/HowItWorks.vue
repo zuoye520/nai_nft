@@ -25,7 +25,7 @@
                   <span class="text-xl font-bold text-green-400">1</span>
                 </div>
                 <div class="flex-1">
-                  <p class="text-gray-300">45% of Mint income (NULS) will be paid to users through the slot machine model.</p>
+                  <p class="text-gray-300">75% of the Mint income (NULS) will be randomly paid to users through the slot machine model.</p>
                 </div>
               </div>
   
@@ -34,7 +34,7 @@
                   <span class="text-xl font-bold text-green-400">2</span>
                 </div>
                 <div class="flex-1">
-                  <p class="text-gray-300">30% of Mint income (NULS) will be pledged to the NULS consensus node for permanent lock-up (after the Mint stage, the pledge income will be automatically injected into the Swap liquidity pool for permanent lock-up).</p>
+                  <p class="text-gray-300">20% of the Mint income (NULS) and the remaining unminted NFTs will be used in the platform BoundingCuve+AMM model to create liquidity for Swap transactions and be permanently locked.</p>
                 </div>
               </div>
   
@@ -43,7 +43,7 @@
                   <span class="text-xl font-bold text-green-400">3</span>
                 </div>
                 <div class="flex-1">
-                  <p class="text-gray-300">After the Mint stage, 20% of Mint income (NULS) and the remaining unminted NFTs will be used to create liquidity for SWAP transactions.</p>
+                  <p class="text-gray-300">5% of the Mint income (NULS) will enter the platform treasury for daily operations and distribution to inviters (50% of the income entering the treasury will be distributed to inviters).</p>
                 </div>
               </div>
   
@@ -52,18 +52,18 @@
                   <span class="text-xl font-bold text-green-400">4</span>
                 </div>
                 <div class="flex-1">
-                  <p class="text-gray-300">5% of the Mint income will go into the platform treasury for daily operations and distribution to platform contributors (50% of the income going into the treasury will be distributed to invited contributors).</p>
+                  <p class="text-gray-300">After the Mint phase, 50% of the Swap transaction fee income will be distributed to the deployer.</p>
                 </div>
               </div>
   
-              <div class="flex items-start gap-4">
+              <!-- <div class="flex items-start gap-4">
                 <div class="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
                   <span class="text-xl font-bold text-green-400">5</span>
                 </div>
                 <div class="flex-1">
                   <p class="text-gray-300">After the Mint phase, 30% of the Swap transaction fee income will be distributed to the deployer.</p>
                 </div>
-              </div>
+              </div> -->
             </div>
           </div>
         </div>
@@ -77,7 +77,7 @@
             </p>
             <p class="mt-5"><strong>Lucky Bonus Rules:</strong></p>
             <p class="mt-2">
-              Mint/Swap NFT randomly allocates slot pool balances from 0 to 100%, and users have a winning odds of up to 1000%+.
+              Mint/Swap NFT randomly allocates slot pool balances from 0 to 100%, You will have a chance to win 100X bonus.
             </p>
           </div>
         </div>

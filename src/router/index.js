@@ -8,6 +8,7 @@ import Rewards from '../views/Rewards.vue'
 import Refer from '../views/Refer.vue'
 import HowItWorks from '../views/HowItWorks.vue'
 import Chart from '../views/Chart.vue'
+import ConnectAI from '../views/ConnectAI.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -23,7 +24,8 @@ const router = createRouter({
     { path: '/rewards/:address', component: Rewards },
     { path: '/refer/:address', component: Refer },
     { path: '/how-it-works', component: HowItWorks },
-    { path: '/chart', component: Chart }
+    { path: '/chart', component: Chart },
+    { path: '/connect-ai', component: ConnectAI }
   ]
 })
 
