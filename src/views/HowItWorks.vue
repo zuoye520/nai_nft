@@ -71,13 +71,37 @@
         <!-- For Users Section -->
         <div class="mb-16">
           <h2 class="text-2xl font-bold text-white mb-6">For Users</h2>
+          
           <div class="bg-gray-900/50 rounded-xl p-8 border border-gray-800">
-            <p class="text-gray-300">
-              During the Mint phase, you can directly Mint your favorite NFTs and have a 100% chance to win the slot lucky bonus reward. After the Mint phase, you can trade NFTs on the Swap page. If the transaction fee is 10% or higher, each transaction will also give you a chance to win the slot lucky bonus.
-            </p>
-            <p class="mt-5"><strong>Lucky Bonus Rules:</strong></p>
+
+            <div class="flex items-start gap-4">
+              <div class="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                <span class="text-xl font-bold text-green-400">1</span>
+              </div>
+              <div class="flex-1">
+                <p class="text-gray-300">During the Mint phase, you can directly Mint your favorite NFTs and have a 100% chance to win the slot lucky bonus. </p>
+              </div>
+            </div>
+
+            <div class="flex items-start gap-4 mt-6">
+              <div class="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                <span class="text-xl font-bold text-green-400">2</span>
+              </div>
+              <div class="flex-1">
+                <p class="text-gray-300">After the Mint phase, you can trade NFTs on the Swap page. If the transaction fee is 10% or higher, each transaction will also give you a chance to win the slot lucky bonus. </p>
+              </div>
+            </div>
+            <div class="flex items-start gap-4 mt-6">
+              <div class="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
+                <span class="text-xl font-bold text-green-400">3</span>
+              </div>
+              <div class="flex-1">
+                <p class="text-gray-300">After the Mint phase, 50% of the Swap transaction fee income will be distributed to the deployer.</p>
+              </div>
+            </div>
+            <p class="mt-6"><strong>Lucky Bonus Rules:</strong></p>
             <p class="mt-2">
-              Mint/Swap NFT randomly allocates slot pool balances from 0 to 100%, You will have a chance to win 100X bonus.
+              Mint/Swap NFT randomly allocates slot pool balances from 0 to 100%, which means you can get 100X reward of Mint/Swap fees.
             </p>
           </div>
         </div>

@@ -9,6 +9,7 @@ export const CHAINS = {
     rpc: 'https://api.nuls.io', 
     explorer: 'https://nulscan.io',
     createPayment:10,//10 NULS
+    withdrawalFee:1,//1%
     contracts: {
       mainAddress:"tNULSeBaMyqgRwmgPGnaibP2vR4H2ePqQivbot",
       domainAddress:'tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG',
@@ -25,6 +26,7 @@ export const CHAINS = {
     rpc: 'https://beta.api.nuls.io', 
     explorer: 'https://beta.nulscan.io',
     createPayment:10,//10 NULS
+    withdrawalFee:1,//1%
     contracts: {
       mainAddress:"tNULSeBaMzFS3ckgpSC94cpm2nf9vz97c6XenJ",
       domainAddress:'tNULSeBaN6PdzE7zLsLDCEpLAUnMZMCREV27f4',

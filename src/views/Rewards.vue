@@ -13,7 +13,7 @@
       <div class="bg-gradient-to-r from-green-500 to-blue-500 rounded-xl p-6 mb-12">
         <div class="flex items-center justify-between">
           <div>
-            <div class="text-white/80 mb-2">Total Rewards</div>
+            <div class="text-white/80 mb-2">Total Rewards (Withdrawal fee: {{currentChainConfig.withdrawalFee}}%)</div>
             <div class="text-3xl font-bold text-white">{{ rewards }} NULS</div>
           </div>
           <button 
@@ -74,6 +74,7 @@ const route = useRoute()
 const { proxy } = getCurrentInstance();
 import { useWalletStore } from '../stores/wallet'
 const store = useWalletStore()
+const { account, currentChainConfig } = storeToRefs(store)
 
 import { useRewardsStore } from '../stores/rewards'
 const rewardsStore = useRewardsStore()
