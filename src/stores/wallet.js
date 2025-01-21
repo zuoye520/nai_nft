@@ -211,6 +211,10 @@ export const useWalletStore = defineStore('wallet', () => {
   function openExplorer(address) {
     window.open(`${currentChainConfig.value.explorer}/address/info?address=${address || account.value}`, '_blank')
   }
+  function openExplorerContract(address) {
+    window.open(`${currentChainConfig.value.explorer}/contracts/info?contractAddress=${address}&tabName=first`, '_blank')
+  }
+  
   function openExplorerHash(hash) {
     window.open(`${currentChainConfig.value.explorer}/transaction/info?hash=${hash}`, '_blank')
   }
@@ -274,6 +278,7 @@ export const useWalletStore = defineStore('wallet', () => {
     disconnect,
     copyAddress,
     openExplorer,
+    openExplorerContract,
     openExplorerHash,
     init,
     checkNetwork,

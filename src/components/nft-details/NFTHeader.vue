@@ -308,6 +308,10 @@ const checkPrice = async (preset) => {
 
 const handleMint = async () => {
   try {
+    if(amount.value >20){
+      proxy.$toast.show('A maximum of 20 NFTs can be minted at a time', 'error')
+      return;
+    }
     const balance = proxy.$format.fromAmount(walletStore.nulsBalance)
     if( balance*1 < totalMintAmount.value*1){
       proxy.$toast.show('Insufficient balance', 'error')
@@ -336,7 +340,10 @@ const handleMint = async () => {
 
 const handleSwap = async () => {
   try {
-
+    if(amount.value > 20){
+      proxy.$toast.show('A maximum of 20 NFTs can be swapped at a time', 'error')
+      return;
+    }
     let data = {
       from: account.value,
       value: totalSwapAmount.value,

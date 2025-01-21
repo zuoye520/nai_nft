@@ -114,7 +114,7 @@ const onSubmit = handleSubmit(async (values) => {
     }
     const  validName = validTokenNameOrSymbol(values.collectionName)
     if(!validName){
-      proxy.$toast.show('collectionName is invalid', 'error')
+      proxy.$toast.show('collectionName is invalid, Only letters, numbers, and underscores are allowed.', 'error')
       return;
     }
     

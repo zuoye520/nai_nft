@@ -19,9 +19,11 @@
           <div class="mt-10 flex flex-col sm:flex-row justify-center gap-4 animate-fade-in animation-delay-600">
             <CreateNFTButton />
             <BaseButton class="text-lg px-8 py-3">
-              
-              <router-link to="/how-it-works">How it works?</router-link>
+              <router-link to="/connect-ai">Connect AI</router-link>
             </BaseButton>
+          </div>
+          <div class="mt-10 justify-center">
+            <router-link to="/how-it-works">How it works?</router-link>
           </div>
         </div>
       </div>

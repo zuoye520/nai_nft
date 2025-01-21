@@ -3,7 +3,7 @@
     <FormField
       id="collection-name"
       label="NFT Collection Name"
-      v-model="values.collectionName"
+      v-model.trim="values.collectionName"
       :error="errors.collectionName"
       placeholder="Enter collection name"
       required
