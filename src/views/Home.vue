@@ -2,7 +2,7 @@
   <main class="min-h-screen">
     <!-- Hero Section -->
     <div class="relative">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-15">
         <div class="text-center">
           <h1 class="text-5xl md:text-7xl font-bold mb-6 animate-fade-in">
             <GradientText>THE WORLD'S FIRST</GradientText>
