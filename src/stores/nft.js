@@ -125,13 +125,15 @@ export const useNftStore = defineStore('nft', () => {
     // }
   ])
   //持有NFT 前20名 Mock
-  const nftHolders = ref([{
-    // address: `NULS${Math.random().toString(16).slice(2, 42)}`,
-    // avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${1}`,
-    // balance: 0,
-    // percentage: 0,
-    // joinDate: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
-  }])
+  const nftHolders = ref([
+  //   {
+  //   address: `NULS${Math.random().toString(16).slice(2, 42)}`,
+  //   avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${1}`,
+  //   balance: 0,
+  //   percentage: 0,
+  //   joinDate: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000
+  // }
+])
   //回复列表 Mock
   const repliesTotal = ref(0)
   const replies = ref([
