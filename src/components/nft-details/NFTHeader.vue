@@ -56,7 +56,7 @@
             <InformationCircleIcon class="w-5 h-5 text-gray-400 hover:text-green-400 cursor-help" />
             <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-72 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
               <div class="bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-lg p-3 text-sm text-gray-300">
-                The total supply of NFT is divided into two parts, {{nft.mintPercent}}% is used for fair mint, and {{100-nft.mintPercent}}% is used to enter the liquidity pool for swap transactions.
+                The total supply of NFT is divided into two parts, {{nft.mintPercent}}% is used for fair mint, and {{100-nft.mintPercent}}% is used to enter the liquidity pool for swap transactions,100% of the minted NFTs receive lucky rewards.
                 <div class="absolute left-1/2 -bottom-2 -translate-x-1/2 border-8 border-transparent border-t-gray-900/95"></div>
               </div>
             </div>
