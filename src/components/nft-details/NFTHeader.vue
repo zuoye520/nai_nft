@@ -62,7 +62,7 @@
             </div>
           </div>
         </div>
-        <div class="space-x-2">
+        <div class="space-x-2" v-if="remainingSupply > 0">
           <div class="  text-white">Pool：<span class="text-green-400">{{ swapSupply }} NTFs - {{swapSupplyNulsProgress}} NULS</span></div>
         </div>
         
