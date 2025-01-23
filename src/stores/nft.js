@@ -82,6 +82,10 @@ export const useNftStore = defineStore('nft', () => {
     totalSupply: 1000,
     mintedSupply: 600,//id > 2 ? 1000 : 600
     mintPercent: 0,
+    ammReverseToken:0,
+    bcReverseToken:0,
+    threshold:0,
+    projectState:'Mint',
     phase: 'mint', // 'mint' or 'swap'
     description: '',
     buyFee: 0,

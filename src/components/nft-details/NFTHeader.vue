@@ -62,8 +62,8 @@
             </div>
           </div>
         </div>
-        <div class="space-x-2" v-if="remainingSupply > 0">
-          <div class="  text-white">Pool：<span class="text-green-400">{{ swapSupply }} NTFs - {{swapSupplyNulsProgress}} NULS</span></div>
+        <div class="space-x-2" >
+          <div class=" text-white">Pool：<span class="text-green-400">{{ poolSupplyToken }} NTFs - {{poolSupplyNuls}} NULS</span></div>
         </div>
         
       </div>
@@ -255,6 +255,7 @@
                 <input
                   type="number"
                   v-model="amount"
+                  @input="validateAmountInput"
                   @blur="checkPrice(amount)"
                   class="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   :placeholder="`Enter amount to ${tradeType}`"
@@ -360,9 +361,22 @@ const swapSupply = computed(() => {
   return props.nft.totalSupply - targetMintSupply.value
 })
 
-// const swapSupplyNuls = computed(() => {
-//   return ((props.nft.mintedSupply * props.nft.mintPrice * currentChainConfig.value.swapPool)/100).toFixed(2)
-// })
+
+const poolSupplyToken = computed(() => {
+  if(props.nft.projectState == 'Mint'){
+    return swapSupply
+  }else{
+    return props.nft.ammReverseToken - props.nft.threshold + ((props.nft.totalSupply * (100 - props.nft.mintPercent) / 100) - props.nft.bcReverseToken)
+  }
+})
+const poolSupplyNuls = computed(() => {
+  if(props.nft.projectState == 'Mint'){
+    return swapSupplyNulsProgress
+  }else{
+    return proxy.$format.fromAmount(props.nft.ammReverseNuls*1 + props.nft.bcReverseNuls*1)
+  }
+})
+
 const swapSupplyNulsProgress = computed(() => {
   return ((props.nft.mintedSupply * props.nft.mintPrice * currentChainConfig.value.swapPool)/100).toFixed(2)
 })
@@ -401,7 +415,12 @@ const canMint = computed(() => {
 })
 
 const canSwap = computed(() => {
-  return amount.value && Number(amount.value) > 0 && totalSwapAmount.value
+  if(tradeType.value == 'buy'){
+    return amount.value && Number(amount.value) > 0 &&  Number(amount.value) <= 20 && poolSupplyToken >= Number(amount.value) 
+  }else{
+    return amount.value && Number(amount.value) > 0 &&  Number(amount.value) <=20 && nftStore.listTotal >= Number(amount.value) 
+  }
+  
 })
 
 const isMintPhase = computed(() => {
@@ -427,7 +446,17 @@ const handelBuyAndSell = (type) => {
 }
 
 const checkPrice = async (preset) => {
+  if(!preset) return;
   amount.value = preset
+console.log('poolSupplyToken:',poolSupplyToken)
+  if(tradeType.value == "buy" && poolSupplyToken.value < Number(amount.value) ){
+    proxy.$toast.show('Insufficient pool NFTs', 'error')
+    return;
+  }else if(tradeType.value == "sell" && nftStore.listTotal < Number(amount.value) ){
+    proxy.$toast.show('Insufficient NFT available balance', 'error')
+    return;
+  }
+  
   const methodName = tradeType.value == "buy" ? "getBuyCost" : "getSellAmount"
   const data = {
     contractAddress: currentChainConfig.value.contracts.mainAddress,
@@ -494,10 +523,10 @@ const handleSwap = async () => {
         return
       }
     } else if (tradeType.value == 'sell') {
-      if (!(/^-?\d+$/.test(amount.value))) {
-        proxy.$toast.show('Please enter an integer NFT quantity', 'error')
-        return;
-      }
+      // if (!(/^-?\d+$/.test(amount.value))) {
+      //   proxy.$toast.show('Please enter an integer NFT quantity', 'error')
+      //   return;
+      // }
       if (nftStore.listTotal < amount.value) {
         proxy.$toast.show('Insufficient NFT balance', 'error')
         return
