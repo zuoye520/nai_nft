@@ -168,6 +168,7 @@
               <input
                 type="number"
                 v-model="amount"
+                @input="validateAmountInput"
                 class="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 placeholder="Enter amount to mint"
                 :min="1"
@@ -408,6 +409,12 @@ const isMintPhase = computed(() => {
 })
 
 // Methods
+
+const validateAmountInput = (event) => {
+  // 只允许输入正负整数
+  amount.value = event.target.value.replace(/[^-?\d]/g, '');
+};
+
 const onImageLoad = () => {
   imageLoaded.value = true
 }
@@ -487,6 +494,10 @@ const handleSwap = async () => {
         return
       }
     } else if (tradeType.value == 'sell') {
+      if (!(/^-?\d+$/.test(amount.value))) {
+        proxy.$toast.show('Please enter an integer NFT quantity', 'error')
+        return;
+      }
       if (nftStore.listTotal < amount.value) {
         proxy.$toast.show('Insufficient NFT balance', 'error')
         return
