@@ -448,7 +448,6 @@ const handelBuyAndSell = (type) => {
 const checkPrice = async (preset) => {
   if(!preset) return;
   amount.value = preset
-console.log('poolSupplyToken:',poolSupplyToken)
   if(tradeType.value == "buy" && poolSupplyToken.value < Number(amount.value) ){
     proxy.$toast.show('Insufficient pool NFTs', 'error')
     return;
