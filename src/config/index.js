@@ -10,6 +10,10 @@ export const CHAINS = {
     explorer: 'https://nulscan.io',
     createPayment:10,//10 NULS
     withdrawalFee:1,//1%
+    luckyPool:75,//老虎机池：75%
+    swapPool:20,//swap流动性池：20%
+    earnPool:5, //平台收益池：5%
+    nodePool:0,//节点质押:0%
     contracts: {
       mainAddress:"tNULSeBaMyqgRwmgPGnaibP2vR4H2ePqQivbot",
       domainAddress:'tNULSeBaMvEtDfvZuukDf2mVyfGo3DdiN8KLRG',
@@ -27,14 +31,19 @@ export const CHAINS = {
     explorer: 'https://beta.nulscan.io',
     createPayment:10,//10 NULS
     withdrawalFee:1,//1%
+    luckyPool:75,//老虎机池：75%
+    swapPool:20,//swap流动性池：20%
+    earnPool:5, //平台收益池：5%
+    nodePool:0,//节点质押:0%
     contracts: {
-      mainAddress:"tNULSeBaNCB1dTTYu3j58sPKVvzbjezDjiLFgB",
+      mainAddress:"tNULSeBaN98eT7EYEAxNBKH5jfc1N5kJc644dT",
       domainAddress:'tNULSeBaN6PdzE7zLsLDCEpLAUnMZMCREV27f4',
       nrc721Address: 'tNULSeBaNAKi6YYeoLPmQEjvtPhYeTRd6MZzfE',
       stakeAddress:'tNULSeBaN9ivFT3AHDMcBkDcWAuJ4ptQkxoio7'
     }
   }
 }
+
 // 当前环境配置
 export const CURRENT_NETWORK = import.meta.env.VITE_APP_ENV === 'mainnet' 
   ? CHAINS[1]

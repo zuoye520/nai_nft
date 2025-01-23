@@ -34,7 +34,9 @@
     <!-- NFT Info -->
     <div class="mt-10 lg:mt-0">
       <h1 class="text-3xl font-bold text-white">{{ nft.name }}</h1>
-      
+      <!-- <div>
+        There are 100 NFTs in total, of which 80 NFTs are available for minting at a price of 1 NULS (75% of NFTs minted will receive a lucky reward). After all minting is completed, 20% of the raised NULS will automatically join the liquidity pool with the remaining 20 NFTs and start the NFT exchange mode. The initial market value is 71.415 NULS. Currently, there are 0 NFTs left for minting, and 328.44 NULS has been raised so far.
+      </div> -->
       <div class="mt-6">
         <div class="flex items-center space-x-2">
           <span class="text-gray-400">Created by</span>
@@ -48,8 +50,7 @@
       <div class="mt-8 space-y-4">
         <div class="flex justify-between items-center">
         <div class="flex items-center space-x-2">
-          <h3 class="text-xl font-semibold text-white">Mint Progress：<span class="text-green-400">{{ mintProgress }}%</span></h3>
-          
+          <h3 class=" text-white">Mint Progress：<span class="text-green-400">{{ mintProgress }}%</span></h3>
           <!-- 添加提示图标和提示框 -->
           <div class="relative group">
             <InformationCircleIcon class="w-5 h-5 text-gray-400 hover:text-green-400 cursor-help" />
@@ -60,6 +61,9 @@
               </div>
             </div>
           </div>
+        </div>
+        <div class="space-x-2">
+          <div class="  text-white">Pool：<span class="text-green-400">{{ swapSupply }} NTFs - {{swapSupplyNulsProgress}} NULS</span></div>
         </div>
         
       </div>
@@ -131,8 +135,8 @@
                     <span>{{ swapSupply }} NFTs</span>
                   </div>
                   <!-- <div class="flex justify-between text-gray-300">
-                    <span>Current Price:</span>
-                    <span>{{ nft.currentPrice || nft.mintPrice }} NULS</span>
+                    <span>Initial Supply:</span>
+                    <span>{{swapSupplyNuls}} NULS</span>
                   </div> -->
                 </div>
               </div>
@@ -141,11 +145,12 @@
 
           <!-- Phase Labels -->
           <div class="absolute top-full left-0 right-0 flex mt-2" v-if="remainingSupply > 0">
+            <!-- <div>There are 100 NFTs in total, of which 80 NFTs are available for minting at a price of 1 NULS (75% of NFTs minted will receive a lucky reward). After all minting is completed, 20% of the raised NULS will automatically join the liquidity pool with the remaining 20 NFTs and start the NFT exchange mode. The initial market value is 71.415 NULS. Currently, there are 0 NFTs left for minting, and 328.44 SOL has been raised so far.</div> -->
             <div style="width: 70%" class="text-left">
               <span class="text-sm text-gray-400">Mint Phase({{ nft.mintPercent }}%)</span>
             </div>
             <div class="flex-1 text-right">
-              <span class="text-sm text-gray-400">Swap Phase({{ 100-nft.mintPercent }}%)</span>
+              <span class="text-sm text-gray-400">Swap Phase({{ swapPhase }}%)</span>
             </div>
           </div>
         </div>
@@ -345,8 +350,6 @@ const mintProgress = computed(() => {
 })
 
 // Progress bar constants and computed properties
-const MINT_PHASE_PERCENTAGE = 70
-const SWAP_PHASE_PERCENTAGE = 30
 
 const targetMintSupply = computed(() => {
   return Math.floor(props.nft.totalSupply * props.nft.mintPercent / 100)
@@ -356,6 +359,13 @@ const swapSupply = computed(() => {
   return props.nft.totalSupply - targetMintSupply.value
 })
 
+// const swapSupplyNuls = computed(() => {
+//   return ((props.nft.mintedSupply * props.nft.mintPrice * currentChainConfig.value.swapPool)/100).toFixed(2)
+// })
+const swapSupplyNulsProgress = computed(() => {
+  return ((props.nft.mintedSupply * props.nft.mintPrice * currentChainConfig.value.swapPool)/100).toFixed(2)
+})
+
 const mintPhaseProgress = computed(() => {
   if (props.nft.mintedSupply >= targetMintSupply.value) {
     return 100
@@ -363,13 +373,8 @@ const mintPhaseProgress = computed(() => {
   return (props.nft.mintedSupply / targetMintSupply.value * 100).toFixed(2)
 })
 
-const swapPhaseProgress = computed(() => {
-  if (props.nft.mintedSupply <= targetMintSupply.value) {
-    return 0
-  }
-  const swapSupply = props.nft.totalSupply - targetMintSupply.value
-  const swapMinted = props.nft.mintedSupply - targetMintSupply.value
-  return ((swapMinted / swapSupply) * 100).toFixed(2)
+const swapPhase = computed(() => {
+  return 100-props.nft.mintPercent
 })
 
 const totalProgress = computed(() => {
