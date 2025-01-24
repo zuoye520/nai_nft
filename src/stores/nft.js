@@ -206,7 +206,7 @@ export const useNftStore = defineStore('nft', () => {
       item.mintPercent = item.mintPercent/100 
       item.totalSupply = item.maxSupply
       item.mintedSupply = item.minted
-      item.marketValue = item.projectState =='Swap'? fromAmount(item.minted * item.currentPrice) : fromAmount(item.minted * item.mintPrice) //市值
+      item.marketValue = item.projectState =='Swap' && item.currentPrice ? fromAmount(item.maxSupply * item.currentPrice) : fromAmount(item.minted * item.mintPrice) //市值
       return item
     })
     nfts.value = list;
@@ -219,7 +219,7 @@ export const useNftStore = defineStore('nft', () => {
     result.image = IPFS_GATEWAY + result.uri
     result.totalSupply = result.maxSupply
     result.mintedSupply = result.minted
-    result.marketValue = result.projectState =='Swap' && result.currentPrice ? fromAmount(result.minted * result.currentPrice) : fromAmount(result.minted * result.mintPrice) //市值
+    result.marketValue = result.projectState =='Swap' && result.currentPrice ? fromAmount(result.maxSupply * result.currentPrice) : fromAmount(result.minted * result.mintPrice) //市值
     result.mintPrice = fromAmount(result.mintPrice)
     result.mintPercent = result.mintPercent/100 
     result.buyFee = result.buyFee/100 
