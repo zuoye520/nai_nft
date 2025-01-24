@@ -416,7 +416,7 @@ const canMint = computed(() => {
 
 const canSwap = computed(() => {
   if(tradeType.value == 'buy'){
-    return amount.value && Number(amount.value) > 0 &&  Number(amount.value) <= 20 && poolSupplyToken >= Number(amount.value) 
+    return amount.value && Number(amount.value) > 0 &&  Number(amount.value) <= 20 && poolSupplyToken.value >= Number(amount.value) 
   }else{
     return amount.value && Number(amount.value) > 0 &&  Number(amount.value) <=20 && nftStore.listTotal >= Number(amount.value) 
   }
